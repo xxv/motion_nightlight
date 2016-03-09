@@ -1,19 +1,24 @@
 #include <FastLED.h>
+#include "apa102_dim.h"
 
-#define COLOR          135
 #define DIM_TIME       3000
-#define MAX_BRIGHTNESS 20
-#define NUM_LEDS       5
-#define NUM_LEDS_ACTIVE       1
+#define MAX_BRIGHTNESS 31
+#define NUM_LEDS       1
 #define PIN_MOTION     5
 
 CRGB leds[NUM_LEDS];
 
 int brightness = 0;
 
+APA102Controller_WithBrightness <MOSI, SPI_CLOCK, BGR>ledController;
+
 void setup() {
   pinMode(PIN_MOTION, INPUT);
-  FastLED.addLeds<APA102, BGR>(leds, NUM_LEDS);
+  FastLED.addLeds((CLEDController*) &ledController, leds, NUM_LEDS);
+
+  for (uint8_t i = 0; i < NUM_LEDS; i++) {
+    leds[i] = CRGB(20, 22, 22);
+  }
 }
 
 void loop() {
@@ -27,9 +32,8 @@ void loop() {
     brightness = MAX_BRIGHTNESS;
   }
 
-  for (uint8_t i = 0; i < NUM_LEDS_ACTIVE; i++) {
-    leds[i] = CRGB(brightness, brightness, brightness);
-  }
+  ledController.setAPA102Brightness(brightness);
+
   FastLED.show();
 
   delay(DIM_TIME/MAX_BRIGHTNESS);
