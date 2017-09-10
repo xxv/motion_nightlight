@@ -9,6 +9,7 @@
 CRGB leds[NUM_LEDS];
 
 int brightness = 0;
+int prev_brightness = 0;
 
 APA102Controller_WithBrightness <MOSI, SPI_CLOCK, BGR>ledController;
 
@@ -32,9 +33,11 @@ void loop() {
     brightness = MAX_BRIGHTNESS;
   }
 
-  ledController.setAPA102Brightness(brightness);
+  if (prev_brightness != brightness) {
+    ledController.setAPA102Brightness(brightness);
 
-  FastLED.show();
+    FastLED.show();
+  }
 
   delay(DIM_TIME/MAX_BRIGHTNESS);
 }
