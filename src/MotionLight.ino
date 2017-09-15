@@ -1,43 +1,94 @@
 #include <FastLED.h>
 #include "apa102_dim.h"
 
-#define DIM_TIME       3000
-#define MAX_BRIGHTNESS 31
-#define NUM_LEDS       1
-#define PIN_MOTION     5
+const static int DIM_TIME       = 1;
+const static int MAX_BRIGHTNESS = 20;
+const static int MAX_FADE       = 31;
+const static int PIN_MOTION     = PIN_B2;
+const static int STATUS_LED     = PIN_B1;
+const static int RGB_LED        = 0;
+const static int WHITE_LED      = 1;
+const static int NUM_LEDS       = 2;
+const static long TIMEOUT       = 10000; // ms
 
+long on_time = 0;
 CRGB leds[NUM_LEDS];
 
-int brightness = 0;
-int prev_brightness = 0;
+CRGB color = CRGB(0, 0, 0);
 
-APA102Controller_WithBrightness <MOSI, SPI_CLOCK, BGR>ledController;
+int brightness = 20;
+int fade_value = 0;
+int white_fade = 255;
+
+APA102Controller_WithBrightness<6, 4, BGR>ledController;
 
 void setup() {
   pinMode(PIN_MOTION, INPUT);
+  pinMode(STATUS_LED, OUTPUT);
   FastLED.addLeds((CLEDController*) &ledController, leds, NUM_LEDS);
-
-  for (uint8_t i = 0; i < NUM_LEDS; i++) {
-    leds[i] = CRGB(20, 22, 22);
-  }
+  digitalWrite(STATUS_LED, LOW);
+  leds[WHITE_LED] = CRGB(0, 0, 0);
+  leds[RGB_LED] = CRGB(20, 0, 0);
+  FastLED.show();
+  delay(500);
+  leds[RGB_LED] = CRGB(0, 20, 0);
+  FastLED.show();
+  delay(500);
+  leds[RGB_LED] = CRGB(0, 0, 20);
+  FastLED.show();
+  delay(500);
+  leds[RGB_LED] = CRGB(0, 0, 0);
+  leds[WHITE_LED] = CRGB(20, 0, 0);
+  FastLED.show();
+  delay(500);
+  digitalWrite(STATUS_LED, HIGH);
 }
 
+bool motion = false;
+bool light_on = false;
+bool update_color = true;
+
 void loop() {
-  brightness += digitalRead(PIN_MOTION) ? 1 : -1;
+  motion = digitalRead(PIN_MOTION);
 
-  if (brightness < 0) {
-    brightness = 0;
+  if (motion) {
+    on_time = millis();
+
+    if (!light_on) {
+      color = CRGB(random8(), random8(), random8());
+      update_color = true;
+    }
+
+    light_on = true;
   }
 
-  if (brightness > MAX_BRIGHTNESS) {
-    brightness = MAX_BRIGHTNESS;
+  if (!motion && light_on && (millis() - on_time) > TIMEOUT) {
+    light_on = false;
   }
 
-  if (prev_brightness != brightness) {
-    ledController.setAPA102Brightness(brightness);
+  if (update_color) {
+    leds[RGB_LED] = color;
+    leds[WHITE_LED] = CRGB(255, 0, 0);
 
-    FastLED.show();
+    leds[RGB_LED].nscale8_video(255 - white_fade);
+    leds[WHITE_LED].nscale8_video(white_fade);
+
+    leds[RGB_LED].nscale8_video(brightness);
+    leds[WHITE_LED].nscale8_video(brightness);
   }
 
-  delay(DIM_TIME/MAX_BRIGHTNESS);
+  ledController.setAPA102Brightness(fade_value);
+
+  FastLED.show();
+
+  fade_value += light_on ? 1 : -1;
+
+  if (fade_value < 0) {
+    fade_value = 0;
+  } else if (fade_value > MAX_FADE) {
+    fade_value = MAX_FADE;
+  }
+
+  update_color = false;
+  delay(1);
 }
