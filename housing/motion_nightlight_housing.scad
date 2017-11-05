@@ -1,113 +1,113 @@
 $fn=120;
-
-height=30;
-radius=50;
-wall_thickness=2;
-rounding=4;
-
-motion_radius=23/2;
-
-diffuser_outer_r=radius-5;
-diffuser_inner_r=40/2;
-diffuser_thickness=0.25;
-
-bottom_thickness=2;
-brace=10;
-screw_hole=1.5;
-screw_hole_bevel=8;
-tooth_extends=1;
-
 smidge = 0.1;
 
-//cutaway();
-//bottom();
-//color(alpha=0.1)
-top_print();
-//teeth();
+battery_size = [];
+board_size = [];
+board_hole_offset = 3.5;
 
-module cutaway() {
-  difference() {
-    top();
-    cube([100,100,100]);
+electronics();
+enclosure_with_design([100, 100, 36.1]);
+
+module enclosure_with_design(outer_size) {
+  translate([0, 0, -22]) {
+    translate([-1.5, -1.5, outer_size[2] - 2])
+      diffuser_and_grate(outer_size);
+
+    color("SaddleBrown", alpha=0.8)
+      translate([-3.5, -3.5, 0])
+        enclosure(outer_size);
   }
 }
 
-module bottom() {
-  difference() {
-    union() {
-    cylinder(r=radius-wall_thickness,h=bottom_thickness);
+module diffuser_and_grate(outer_size) {
+        translate([0, 0, 0.51])
+        color(c=[0.2, 0.2, 0.2])
+          import("metal mesh design.dxf");
+    // diffuser
+    color(c=[0.9, 0.9, 0.9, 0.9])
+      cube(outer_size - [5, 5, outer_size[2]-0.1]);
+}
 
-      teeth();
-    }
+module screw() {
+  color([0.3, 0.3, 0.3])
+  import("screw.stl");
+  color([0.7, 0.7, 0.7])
+  translate([0, 0, -4.3])
+    import("nut.stl");
+}
 
-    translate([0, 0, -smidge])
+module enclosure(outer_size, wall=3) {
     difference() {
-      cylinder(r=radius - wall_thickness * 2, h=bottom_thickness*2);
-      cross(radius, brace, bottom_thickness);
+      cube(outer_size);
+      translate([wall, wall, wall])
+        cube(outer_size - [wall, wall, 0] * 2);
     }
-    for(rot = [ 0 : 90 : 270 ])
-      rotate([0,0,rot])
-        translate([radius - 10, 0, -smidge])
-          cylinder(r1=screw_hole, r2=screw_hole_bevel, h=bottom_thickness * 3);
+ }
+
+module electronics() {
+  translate([14, 0, 0]) {
+    board();
+    translate([32.7,3.4,-0.6])
+      rotate([0,180,0])
+      battery();
+    translate([16.5, 29.8, -2.5]) {
+      translate([0, 0, 0])
+        rotate([0, 180, 0])
+          screw();
+      translate([30, 0, 0])
+        rotate([0, 180, 0])
+          screw();
+    }
   }
-
 }
 
-module top_print() {
-  translate([0,0,height])
-  rotate([180,0,0])
-    top();
+module battery() {
+  color(c=[0.2, 0.2, 0.2])
+    translate([2,23,7])
+      rotate([90,0,-90])
+        import("keystone-PN2464.stl");
 }
 
-module top() {
-  difference() {
-    shell();
-    cylinder(r=motion_radius, h=height + rounding);
-    translate([0,0,-smidge])
-      cylinder(r=radius - wall_thickness, h=height - wall_thickness+smidge);
+module board() {
+  color("purple") {
+    rotate([0, 0, 90])
+      translate([-114, 60, 0])
+        import("../board/motion_light.stl");
+    translate([32, 7, 1])
+      pir();
+    translate([32, 20, 2])
+      photo_resistor();
+  }
+};
+
+module pir() {
+  cylinder(r1=11/2, r2=9.5/2,h=13);
+}
+
+module pir_wide() {
+  cylinder(r1=11/2, r2=9.5/2,h=13);
+
+  translate([0, 0, 7.3])
     difference() {
-      cylinder(r=diffuser_outer_r, h=height - diffuser_thickness);
-      translate([0,0,-smidge])
-      cylinder(r=diffuser_inner_r, h=height + rounding+smidge*2);
+    sphere(r=20.7/2);
+      translate([-16, -16, -62])
+      cube([32, 32, 62]);
     }
-
-    // slot to hold bottom on
-    translate([0, 0, -smidge])
-      intersection() {
-        cross(radius + tooth_extends+smidge, brace+smidge, bottom_thickness+smidge);
-        cylinder(r=radius-wall_thickness+tooth_extends+smidge, h=bottom_thickness+smidge);
-      }
-    for (rot=[0 : 5 : 15])
-      rotate([0,0,rot])
-        render()
-          teeth();
-
-  }
 }
 
-module shell() {
-  difference() {
-  translate([0,0,0])
-    minkowski() {
-      cylinder(r=radius-rounding, h=height-rounding);
-      sphere(r=rounding);
-    }
-
-    translate([-radius, -radius, -rounding*2])
-    cube([radius*2,radius*2,rounding*2]);
-  }
-}
-
-module teeth() {
+module cut_cylinder(r, h, cut) {
   intersection() {
-    cross(radius*2, brace, bottom_thickness * 3);
-    cylinder(r1=radius-wall_thickness, r2=radius-wall_thickness + tooth_extends, h=bottom_thickness);
+    cylinder(r=r, h=h);
+    translate([-r, -r + cut, 0])
+    cube([r * 2, r * 2 - cut * 2, h+smidge*2]);
   }
 }
 
-module cross(r, w, h) {
-      for(rot = [ 0 : 90 : 90 ])
-        rotate([0,0,rot])
-          translate([-r, -w/2, 0])
-            cube([r*2, w, h]);
-}
+module photo_resistor(photo_sensor_r=5/2, photo_sensor_h=2, photo_sensor_cut=0.5, photo_sensor_lead_hole_r=0.25, photo_sensor_lead_h=24) {
+  height = 2;
+  cut_cylinder(r=photo_sensor_r, h=photo_sensor_h, cut=photo_sensor_cut);
+  translate([-2.7/2, 0, -photo_sensor_lead_h])
+  cylinder(r=photo_sensor_lead_hole_r, h=photo_sensor_lead_h);
+  translate([2.7/2, 0, -photo_sensor_lead_h])
+  cylinder(r=photo_sensor_lead_hole_r, h=photo_sensor_lead_h);
+  }
