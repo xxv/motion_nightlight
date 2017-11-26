@@ -129,8 +129,8 @@ module board() {
       pir();*/
     translate([board_size[0]/2, 12.5, 0.8])
       pir_wide();
-    translate([board_size[0]/2, 22, 2])
-      photo_resistor();
+    translate([10.5, 28, 2])
+      photo_resistor(lead_h=4);
 };
 
 module pir() {
@@ -152,13 +152,13 @@ module pir_wide() {
     }
 }
 
-module photo_resistor(photo_sensor_r=5/2, photo_sensor_h=2, photo_sensor_cut=0.5, photo_sensor_lead_hole_r=0.25, photo_sensor_lead_h=24) {
+module photo_resistor(photo_sensor_r=5/2, photo_sensor_h=2, photo_sensor_cut=0.5, photo_sensor_lead_hole_r=0.25, lead_h=24) {
   height = 2;
   cut_cylinder(r=photo_sensor_r, h=photo_sensor_h, cut=photo_sensor_cut);
-  translate([-2.7/2, 0, -photo_sensor_lead_h])
-  cylinder(r=photo_sensor_lead_hole_r, h=photo_sensor_lead_h);
-  translate([2.7/2, 0, -photo_sensor_lead_h])
-  cylinder(r=photo_sensor_lead_hole_r, h=photo_sensor_lead_h);
+  translate([-2.7/2, 0, -lead_h])
+  cylinder(r=photo_sensor_lead_hole_r, h=lead_h);
+  translate([2.7/2, 0, -lead_h])
+  cylinder(r=photo_sensor_lead_hole_r, h=lead_h);
   }
 
 module screw() {
