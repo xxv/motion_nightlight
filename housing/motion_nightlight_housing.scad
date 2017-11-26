@@ -1,25 +1,33 @@
-$fn=120;
+include <boxmaker.scad>;
+
+$fn = 120;
 smidge = 0.1;
 
-battery_size = [];
 board_size = [64, 35.0, 1.6];
 board_hole_offset = 3.5;
-wall_size=3;
+wall_size = 3;
+battery_hole_size = [46, 55];
+battery_hole_offset = [0, -3];
 
-interior = [94, 94, 37.5];
+//interior = [94, 94, 37.5];
+interior = [94, 94, 31];
 
-translate([interior[0]/2 - board_size[0]/2, 1, 0])
-  electronics();
-enclosure_with_design(interior);
+mockup();
 
-module enclosure_with_design(outer_size) {
-  translate([0, 0, -22]) {
-    translate([-1, -1, outer_size[2] - 2])
-      diffuser_and_grate(outer_size);
+module mockup() {
+  translate([interior[0]/2 - board_size[0]/2, 1, 0])
+    electronics();
+  enclosure_with_design(interior);
+}
+
+module enclosure_with_design(interior) {
+  translate([0, 0, -(interior[2] - 15.5)]) {
+    translate([-1, -1, interior[2] - 2])
+      diffuser_and_grate(interior);
 
     color("SaddleBrown", alpha=0.8)
-      translate([-wall_size, -wall_size, 0])
-        enclosure(outer_size, wall_size);
+      translate([0, 0, -wall_size])
+        enclosure(interior, wall_size);
   }
 }
 
@@ -28,7 +36,7 @@ module diffuser_and_grate(inner_size) {
     color(c=[0.2, 0.2, 0.2])
       import("metal mesh design.dxf");
   // diffuser
-  color(c=[0.9, 0.9, 0.9])
+  color(c=[0.95, 0.95, 0.95, 1])
     difference() {
       cube(inner_size + [2, 2, -(inner_size[2]-0.1)]);
       translate([inner_size[0]/2+1, 14.5, -1])
@@ -36,13 +44,58 @@ module diffuser_and_grate(inner_size) {
     }
 }
 
-module enclosure(inner_size, wall) {
+module enclosure(box_inner, thickness) {
+  tab = thickness * 2;
+  tabs = [tab, tab, tab];
+  button_offset = [9.25, 0];
+  button_hole_size = 2;
+
+  // BEGIN 2D LAYOUT
+  //layout_2d(box_inner, thickness) {
+  // END 2D LAYOUT
+
+  // BEGIN 3D PREVIEW
+  layout_3d(box_inner, thickness) {
+  // END 3D PREVIEW
+
+    // Top
+    empty();
+
+    // Bottom
     difference() {
-      cube(inner_size + [wall, wall, 0] * 2);
-      translate([wall, wall, wall])
-        cube(inner_size);
+      side_a(box_inner, thickness, tabs);
+      translate(battery_hole_offset)
+        translate([box_inner[0]/2 - battery_hole_size[0]/2, box_inner[1] - battery_hole_size[1]])
+          square(battery_hole_size);
     }
- }
+
+    // Left
+    difference() {
+      side_b(box_inner, thickness, tabs);
+    }
+
+    // Right
+    difference() {
+      side_b(box_inner, thickness, tabs);
+    }
+
+    // Front
+    difference() {
+      side_c(box_inner, thickness, tabs);
+      translate([box_inner[0]/2, box_inner[2] - 8.1]) {
+        translate(-button_offset)
+          circle(r=button_hole_size);
+        translate(button_offset)
+          circle(r=button_hole_size);
+        }
+    }
+
+    // Back
+    difference() {
+      side_c(box_inner, thickness, tabs);
+    }
+  }
+}
 
 module electronics() {
   board();
