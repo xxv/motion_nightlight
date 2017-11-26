@@ -103,9 +103,9 @@ F 1 "SW_Push" H 5600 650 50 0000 C CNN
 F 2 "Buttons_Switches_THT:SW_Tactile_SPST_Angled_PTS645Vx83-2LFS" H 5650 950 50 0001 C CNN
 F 3 "http://www.ckswitches.com/media/1471/pts645.pdf" H 5650 950 50 0001 C CNN
 F 4 "C&K" H 0 0 50 0001 C CNN "MFR"
-F 5 "PTS645VH83-2 LFS" H 0 0 50 0001 C CNN "MPN"
+F 5 "PTS645VL83-2 LFS" H 0 0 50 0001 C CNN "MPN"
 F 6 "Digikey" H 0 0 50 0001 C CNN "SPR"
-F 7 "CKN9121-ND" H 0 0 50 0001 C CNN "SPN"
+F 7 "CKN9123-ND" H 0 0 50 0001 C CNN "SPN"
 F 8 "-" H 0 0 50 0001 C CNN "SPURL"
 	1    5650 750 
 	1    0    0    -1  
@@ -451,9 +451,9 @@ F 1 "PIR_MODULE" H 4150 2400 60 0000 C CNN
 F 2 "StaticfreeFootprints:PaPIR_PIR_SENSOR" H 4050 2600 60 0001 C CNN
 F 3 "http://www3.panasonic.biz/ac/e_download/control/sensor/human/catalog/bltn_eng_papirs.pdf" H 4050 2600 60 0001 C CNN
 F 4 "Panasonic" H 0 0 50 0001 C CNN "MFR"
-F 5 "EKMC1601111" H 0 0 50 0001 C CNN "MPN"
+F 5 "EKMC1603112" H 0 0 50 0001 C CNN "MPN"
 F 6 "Digikey" H 0 0 50 0001 C CNN "SPR"
-F 7 "255-3074-ND" H 0 0 50 0001 C CNN "SPN"
+F 7 "255-3087-ND" H 0 0 50 0001 C CNN "SPN"
 F 8 "-" H 0 0 50 0001 C CNN "SPURL"
 	1    4050 2600
 	1    0    0    -1  
@@ -467,9 +467,9 @@ F 1 "SW_Push" H 5600 1100 50 0000 C CNN
 F 2 "Buttons_Switches_THT:SW_Tactile_SPST_Angled_PTS645Vx83-2LFS" H 5650 1400 50 0001 C CNN
 F 3 "http://www.ckswitches.com/media/1471/pts645.pdf" H 5650 1400 50 0001 C CNN
 F 4 "C&K" H 0 0 50 0001 C CNN "MFR"
-F 5 "PTS645VH83-2 LFS" H 0 0 50 0001 C CNN "MPN"
+F 5 "PTS645VL83-2 LFS" H 0 0 50 0001 C CNN "MPN"
 F 6 "Digikey" H 0 0 50 0001 C CNN "SPR"
-F 7 "CKN9121-ND" H 0 0 50 0001 C CNN "SPN"
+F 7 "CKN9123-ND" H 0 0 50 0001 C CNN "SPN"
 F 8 "-" H 0 0 50 0001 C CNN "SPURL"
 	1    5650 1200
 	1    0    0    -1  
@@ -507,7 +507,7 @@ F 3 "https://www.seielect.com/Catalog/SEI-rncp.pdf" H 4500 2000 50 0001 C CNN
 F 4 "Stackpole Electronics Inc." H 0 0 50 0001 C CNN "MFR"
 F 5 "RNCP0805FTD68K1" H 0 0 50 0001 C CNN "MPN"
 F 6 "Digikey" H 0 0 50 0001 C CNN "SPR"
-F 7 "RNCP0805FTD10K0CT-ND" H 0 0 50 0001 C CNN "SPN"
+F 7 "RNCP0805FTD68K1CT-ND" H 0 0 50 0001 C CNN "SPN"
 F 8 "-" H 0 0 50 0001 C CNN "SPURL"
 	1    4500 2000
 	0    1    1    0   
