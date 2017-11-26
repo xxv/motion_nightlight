@@ -3,26 +3,39 @@ include <boxmaker.scad>;
 $fn = 120;
 smidge = 0.1;
 
-board_size = [64, 35.0, 1.6];
-board_clearance = 1;
-board_hole_offset = 4;
+// main interior volume
+interior = [94, 94, 32];
+// thickness of the wall material
 wall_size = 3;
+// distance between the top and the board
+board_z = 12.5;
+
+// size of the PCB
+board_size = [64, 35.0, 1.6];
+// Clearance from the wall for the board
+board_clearance = 1;
+// distance in from the edge of the PCB that the holes are
+board_hole_offset = 4;
+
 battery_hole_size = [46, 55];
 battery_hole_offset = [0, 3];
-laser_pilot_hole=1.33/2;
+// holes to screw plate into the wood
+laser_pilot_hole = 1.33/2;
 
+// amount that the board mount overlaps with the wood
 overlap = 5;
+// how much inset the battery lid rest is from the battery hole
 inset = 1;
+
+// width of the plate holding the board
 plate_width = board_size[0] + overlap * 2;
+// Wood screws that mount the plate to the bottom wall
 wood_screws = [
   [battery_hole_size[0]/2 + overlap/2, board_clearance + board_size[1] + overlap/2, 0],
   [battery_hole_size[0]/2 + overlap/2, battery_hole_size[1] + battery_hole_offset[1] + overlap/2, 0],
   [plate_width/2 - overlap/2, overlap/2, 0]
   ];
 
-interior = [94, 94, 32];
-
-board_z = 12.5;
 
 mockup();
 //enclosure(interior, wall_size);
@@ -61,8 +74,6 @@ module diffuser_and_grate(inner_size) {
 }
 
 module board_holder() {
-  overlap = 5;
-  inset = 1;
   thickness = 1;
   stand_width = 6;
   battery_hole = [battery_hole_size[0] - inset * 2, battery_hole_size[1] - inset * 2, thickness + 1];
@@ -79,33 +90,48 @@ module board_holder() {
             translate(screw)
               import("m2.2_wood_screw.stl");
 
+  corner_r = overlap/2;
+  overlap_rounded = overlap - corner_r;
+  plate_width_rounded = plate_width - corner_r - overlap/2;
+
   // main plate
-  difference() {
-    union() {
-      translate([interior[0]/2 - battery_hole_size[0]/2 - overlap, 0, 0])
-        cube([battery_hole_size[0] + overlap * 2, battery_hole_size[1] + battery_hole_offset[1] + overlap, thickness]);
-      translate([interior[0]/2 - plate_width/2, 0, 0])
-        cube([plate_width, board_size[1] + board_clearance + overlap, thickness]);
-      translate([interior[0]/2, 0, 1])
-          for (m = [0 : 1 : 1])
-            mirror([m, 0, 0])
-              for (screw = wood_screws)
-                translate(screw)
-                  translate([-overlap/2, -overlap/2, 0])
-                    cube([overlap, overlap, screw_standoff]);
+  intersection() {
+    difference() {
+      union() {
+        minkowski() {
+          union() {
+            translate([interior[0]/2 - battery_hole_size[0]/2 - overlap_rounded, 0, 0])
+              cube([battery_hole_size[0] + (overlap_rounded) * 2, battery_hole_size[1] + battery_hole_offset[1] + overlap_rounded, thickness]);
 
-    }
-    translate(battery_hole_offset)
-      translate([interior[0]/2 - battery_hole[0]/2, inset, -0.5])
-        cube(battery_hole);
-
-    translate([interior[0]/2, 0, -1])
-      for (m = [0 : 1 : 1])
-        mirror([m, 0, 0]) {
-          for (screw = wood_screws)
-            translate(screw)
-              cylinder(r=plate_screw_hole/2, h=10);
+            translate([interior[0]/2 - plate_width_rounded/2, 0, 0])
+              cube([plate_width_rounded, board_size[1] + board_clearance + overlap_rounded, thickness]);
+            }
+            cylinder(r=corner_r, h=0.0001);
         }
+
+        // Screw stands
+        translate([interior[0]/2, 0, 1])
+            for (m = [0 : 1 : 1])
+              mirror([m, 0, 0])
+                for (screw = wood_screws)
+                  translate(screw)
+                    cylinder(r=overlap/2, h=screw_standoff);
+      }
+
+      // Battery hole
+      translate(battery_hole_offset)
+        translate([interior[0]/2 - battery_hole[0]/2, inset, -0.5])
+          cube(battery_hole);
+
+      // Screw holes
+      translate([interior[0]/2, 0, -1])
+        for (m = [0 : 1 : 1])
+          mirror([m, 0, 0])
+            for (screw = wood_screws)
+              translate(screw)
+                cylinder(r=plate_screw_hole/2, h=10);
+    }
+    cube(interior);
   }
 
   // board stands
@@ -115,8 +141,10 @@ module board_holder() {
         translate([board_size[0]/2 - stand_width - 1, -board_size[1]/2, 0])
           difference() {
             cube([stand_width, board_size[1], z_height]);
+
             translate([stand_width/2, board_hole_offset, z_height - 4.9])
               cylinder(r=board_screw_hole, h=5);
+
             translate([stand_width/2, board_size[1] - board_hole_offset, z_height - 4.9])
               cylinder(r=board_screw_hole, h=5);
           }
@@ -155,6 +183,7 @@ module enclosure(box_inner, thickness) {
       translate([box_inner[0]/2 - screw_hole_spacing/2, screw_head_size * 2, 0])
         rotate([180])
           screw_slot_2d(screw_head_size, screw_size, screw_head_size);
+
       translate([box_inner[0]/2 + screw_hole_spacing/2, screw_head_size * 2, 0])
         rotate([180])
           screw_slot_2d(screw_head_size, screw_size, screw_head_size);
@@ -180,9 +209,11 @@ module enclosure(box_inner, thickness) {
     // Front
     difference() {
       side_c(box_inner, thickness, tabs);
+
       translate([box_inner[0]/2, box_inner[2] - (board_z - 4.4)]) {
         translate(-button_offset)
           circle(r=button_hole_size);
+
         translate(button_offset)
           circle(r=button_hole_size);
         }
