@@ -50,6 +50,10 @@ module enclosure(box_inner, thickness) {
   button_offset = [9.25, 0];
   button_hole_size = 2;
 
+  screw_hole_spacing = 70;
+  screw_size = 3;
+  screw_head_size = screw_size + 3;
+
   // BEGIN 2D LAYOUT
   //layout_2d(box_inner, thickness) {
   // END 2D LAYOUT
@@ -64,9 +68,18 @@ module enclosure(box_inner, thickness) {
     // Bottom
     difference() {
       side_a(box_inner, thickness, tabs);
+      // Battery hole
       translate(battery_hole_offset)
         translate([box_inner[0]/2 - battery_hole_size[0]/2, box_inner[1] - battery_hole_size[1]])
           square(battery_hole_size);
+
+      // Screw holes
+      translate([box_inner[0]/2 - screw_hole_spacing/2, screw_head_size * 2, 0])
+        rotate([180])
+          screw_slot_2d(screw_head_size, screw_size, screw_head_size);
+      translate([box_inner[0]/2 + screw_hole_spacing/2, screw_head_size * 2, 0])
+        rotate([180])
+          screw_slot_2d(screw_head_size, screw_size, screw_head_size);
     }
 
     // Left
@@ -95,6 +108,14 @@ module enclosure(box_inner, thickness) {
       side_c(box_inner, thickness, tabs);
     }
   }
+}
+
+module screw_slot_2d(head_size, screw_size, length) {
+  circle(r=head_size/2);
+    translate([-screw_size/2, 0])
+      square([screw_size, length]);
+  translate([0, length])
+    circle(r=screw_size/2);
 }
 
 module electronics() {
