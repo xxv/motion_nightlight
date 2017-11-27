@@ -136,10 +136,10 @@ module board_holder() {
   stand_width = 6;
   battery_hole = [battery_hole_size[0] - inset * 2, battery_hole_size[1] - inset * 2, thickness + 1];
   board_screw_hole = 0.75;
-  plate_screw_hole = 2.2;
+  plate_screw_hole = 2.5;
   z_height = interior[2] - board_z - board_size[2]/2;
 
-  screw_standoff = 3;
+  screw_standoff = 2.5;
 
 #  translate([interior[0]/2, 0, screw_standoff + 1])
       for (m = [0 : 1 : 1])
@@ -234,7 +234,8 @@ module enclosure(box_inner, thickness) {
       side_a(box_inner, thickness, tabs);
       // Battery hole
       translate(-battery_hole_offset)
-        translate([box_inner[0]/2 - battery_hole_size[0]/2, box_inner[1] - battery_hole_size[1]])
+        translate([box_inner[0]/2 - battery_hole_size[0]/2,
+                   box_inner[1] - battery_hole_size[1]])
           square(battery_hole_size);
 
       // Screw holes
@@ -268,7 +269,7 @@ module enclosure(box_inner, thickness) {
     difference() {
       side_c(box_inner, thickness, tabs);
 
-      translate([box_inner[0]/2, box_inner[2] - (board_z - 4.4)]) {
+      translate([box_inner[0] / 2, box_inner[2] - (board_z - 4.4)]) {
         translate(-button_offset)
           circle(r=button_hole_size);
 
@@ -285,11 +286,12 @@ module enclosure(box_inner, thickness) {
 }
 
 module screw_slot_2d(head_size, screw_size, length) {
-  circle(r=head_size/2);
-    translate([-screw_size/2, 0])
+  circle(r=head_size / 2);
+    translate([-screw_size / 2, 0])
       square([screw_size, length]);
+
   translate([0, length])
-    circle(r=screw_size/2);
+    circle(r=screw_size / 2);
 }
 
 module electronics() {
@@ -298,9 +300,11 @@ module electronics() {
     translate([0, 0, 0])
       rotate([0, 180, 0])
         screw();
+
     translate([30, 0, 0])
       rotate([0, 180, 0])
         screw();
+
     translate([17.1, -26.4, 3.1])
       rotate([0,180,0])
         battery();
@@ -319,6 +323,7 @@ module board() {
     rotate([0, 0, 90])
       translate([-114, 60, 0])
         import("../board/motion_light.stl");
+
   color([0.3, 0.3, 0.3])
    /* translate([32, 7, 1])
       pir();*/
@@ -326,7 +331,7 @@ module board() {
       pir_wide();
     translate([10.5, 28, 2])
       photo_resistor(lead_h=4);
-};
+}
 
 module pir() {
   cylinder(r1=11/2, r2=9.5/2, h=13);
