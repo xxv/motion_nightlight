@@ -36,10 +36,23 @@ wood_screws = [
   [plate_width/2 - overlap/2, overlap/2, 0]
   ];
 
+stand_volume = interior + [0, 0, 1];
+
+//////////////////////////////////////////////////////////////////////
 
 mockup();
-//enclosure(interior, wall_size);
-//board_holder();
+
+/********* laser cut *********/
+* enclosure(interior, wall_size);
+
+/********* 3D Print **********/
+* board_holder();
+* grate();
+* diffuser_stand_print();
+  // This can be a knife template for cutting the diffuser material
+* diffuser(stand_volume, 2);
+
+//////////////////////////////////////////////////////////////////////
 
 module mockup() {
   translate([interior[0]/2 - board_size[0]/2, board_clearance, 0])
@@ -47,30 +60,75 @@ module mockup() {
   enclosure_with_design(interior);
 }
 
+module diffuser_stand_print() {
+  translate([0, 0, stand_volume[2]])
+  rotate([0, 180,0])
+  diffuser_stand(stand_volume);
+  }
+
 module enclosure_with_design(interior) {
   translate([0, 0, -(interior[2] - board_z)]) {
-    translate([-1, -1, interior[2] + wall_size - 2])
-      diffuser_and_grate(interior);
+    translate([0, 0, stand_volume[2]])
+      diffuser_and_grate(stand_volume);
 
-    color([0.1, 0.1, 0.1])
+    color([0.5, 0.5, 0.5])
       board_holder();
 
-    color("SaddleBrown", alpha=0.5)
+    color("SaddleBrown", alpha=1)
       enclosure(interior, wall_size);
   }
 }
 
 module diffuser_and_grate(inner_size) {
-  translate([0, 0, 0.51])
+  diffuser_thickness = 0.1;
+
+  translate([0, 0, diffuser_thickness + 0.01])
     color(c=[0.2, 0.2, 0.2])
-      import("metal mesh design.dxf");
+      grate();
+
   // diffuser
   color(c=[0.95, 0.95, 0.95, 1])
+    diffuser(inner_size, diffuser_thickness);
+
+  color(c=[0.2, 0.2, 0.2])
+    translate([0, 0, -inner_size[2] - 0.01])
+      diffuser_stand(inner_size);
+}
+
+module diffuser_stand(inner_size) {
+  inset = 2.2;
+  intersection() {
     difference() {
-      cube(inner_size + [2, 2, -(inner_size[2]-0.1)]);
-      translate([inner_size[0]/2+1, 14.5, -1])
-        cylinder(r=11, h=3);
+      cube(inner_size);
+      inset_size = inner_size - [inset * 2, inset * 2, -1];
+      translate((inner_size - inset_size)/2)
+      cube(inset_size);
     }
+
+    union() {
+      translate([0, 0, inner_size[2] - 1])
+        cube(inner_size - [0, 0, inner_size[2] - 1]);
+
+      for (r = [0 : 90 :360])
+          translate([inner_size[0]/2, inner_size[1]/2, 0])
+        rotate([0, 0, r])
+          translate([inner_size[0]/2, inner_size[1]/2, 0])
+            cylinder(r1=2, r2=15, h=inner_size[2]);
+    }
+  }
+}
+
+module grate() {
+  linear_extrude(height=1)
+    import("metal mesh design.dxf");
+}
+
+module diffuser(inner_size, thickness=0.1) {
+  difference() {
+    cube(inner_size + [0, 0, -(inner_size[2] - thickness)]);
+    translate([inner_size[0]/2, 13.5, -1])
+      cylinder(r=11, h=thickness + 2);
+  }
 }
 
 module board_holder() {
