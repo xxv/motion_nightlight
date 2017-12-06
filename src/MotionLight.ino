@@ -4,8 +4,9 @@
 const static int DIM_TIME       = 1;
 const static int MAX_BRIGHTNESS = 20;
 const static int MAX_FADE       = 31;
-const static int PIN_MOTION     = PIN_B2;
-const static int STATUS_LED     = PIN_B1;
+const static int PIN_AMBIENT    = PIN_A1;
+const static int PIN_MOTION     = PIN_A0;
+const static int STATUS_LED     = PIN_A2;
 const static int RGB_LED        = 0;
 const static int WHITE_LED      = 1;
 const static int NUM_LEDS       = 2;
@@ -26,7 +27,9 @@ void setup() {
   pinMode(PIN_MOTION, INPUT);
   pinMode(STATUS_LED, OUTPUT);
   FastLED.addLeds((CLEDController*) &ledController, leds, NUM_LEDS);
-  digitalWrite(STATUS_LED, LOW);
+
+  // LED test
+  digitalWrite(STATUS_LED, HIGH);
   leds[WHITE_LED] = CRGB(0, 0, 0);
   leds[RGB_LED] = CRGB(20, 0, 0);
   FastLED.show();
@@ -41,7 +44,7 @@ void setup() {
   leds[WHITE_LED] = CRGB(20, 0, 0);
   FastLED.show();
   delay(500);
-  digitalWrite(STATUS_LED, HIGH);
+  digitalWrite(STATUS_LED, LOW);
 }
 
 bool motion = false;
