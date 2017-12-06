@@ -16,6 +16,7 @@ long on_time = 0;
 CRGB leds[NUM_LEDS];
 
 CRGB color = CRGB(0, 0, 0);
+CRGB white_value = CRGB(255, 0, 0);
 
 int brightness = 20;
 int fade_value = 0;
@@ -58,7 +59,6 @@ void loop() {
     on_time = millis();
 
     if (!light_on) {
-      color = CRGB(random8(), random8(), random8());
       update_color = true;
     }
 
@@ -71,7 +71,7 @@ void loop() {
 
   if (update_color) {
     leds[RGB_LED] = color;
-    leds[WHITE_LED] = CRGB(255, 0, 0);
+    leds[WHITE_LED] = white_value;
 
     leds[RGB_LED].nscale8_video(255 - white_fade);
     leds[WHITE_LED].nscale8_video(white_fade);
