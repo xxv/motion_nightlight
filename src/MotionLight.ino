@@ -52,12 +52,15 @@ const static long TIMEOUT_MS         = 10000;
 const static long SETTING_TIMEOUT_MS = 5000;
 const static long LONG_PRESS_MS      = 1000;
 
+const static int AMBIENT_DARKNESS_LEVEL = 100;
+
 // transient state
 long on_time = 0;
 CRGB leds[NUM_LEDS];
 
 int fade_value = 0;
 bool motion = false;
+bool is_dark_enough = false;
 bool light_on = false;
 bool goingToSleep = false;
 bool update_color = true;
@@ -108,6 +111,7 @@ void led_test() {
 
 void setup() {
   pinMode(PIN_MOTION, INPUT);
+  pinMode(PIN_AMBIENT, INPUT);
   pinMode(PIN_STATUS_LED, OUTPUT);
   FastLED.addLeds((CLEDController*) &ledController, leds, NUM_LEDS);
 
@@ -204,10 +208,11 @@ void loop() {
   button2.read();
 
   motion = digitalRead(PIN_MOTION);
+  is_dark_enough = analogRead(PIN_AMBIENT) <= AMBIENT_DARKNESS_LEVEL;
 
   switch (mode) {
     case sleeping:
-      if (motion) {
+      if (motion && is_dark_enough) {
         setMode(running);
       }
       check_buttons();
