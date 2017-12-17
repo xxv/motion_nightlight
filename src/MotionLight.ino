@@ -87,7 +87,6 @@ void cycle_palette() {
   update_color = true;
 }
 
-
 void led_test() {
   digitalWrite(PIN_STATUS_LED, HIGH);
   leds[WHITE_LED] = CRGB(0, 0, 0);
@@ -159,7 +158,7 @@ void handleSettingMode() {
   }
 }
 
-void handleRunningMode() {
+void check_buttons() {
   if (button1.pressedFor(LONG_PRESS_MS) && button2.pressedFor(LONG_PRESS_MS)) {
     led_test();
   } else if (button1.wasPressed() || button2.wasPressed()) {
@@ -167,7 +166,9 @@ void handleRunningMode() {
     fade_value = APA102_MAXIMUM_BRIGHTNESS;
     setMode(setting);
   }
+}
 
+void handleRunningMode() {
   if (motion) {
     on_time = millis();
 
@@ -209,8 +210,10 @@ void loop() {
       if (motion) {
         setMode(running);
       }
-    // fall through
+      check_buttons();
+      break;
     case running:
+      check_buttons();
       handleRunningMode();
       break;
     case setting:
