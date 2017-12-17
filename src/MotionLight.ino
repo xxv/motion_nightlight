@@ -125,10 +125,14 @@ void setMode(Mode newMode) {
   switch (mode) {
     case sleeping:
     case running:
+#ifndef DEBUG_MOTION
       digitalWrite(PIN_STATUS_LED, LOW);
+#endif
       break;
     case setting:
+#ifndef DEBUG_MOTION
       digitalWrite(PIN_STATUS_LED, HIGH);
+#endif
       break;
   }
 }
@@ -226,7 +230,9 @@ void loop() {
       break;
   }
 
-  //digitalWrite(PIN_STATUS_LED, motion);
+#ifdef DEBUG_MOTION
+  digitalWrite(PIN_STATUS_LED, motion);
+#endif
 
   redrawLights();
 
