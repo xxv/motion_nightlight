@@ -23,8 +23,9 @@ struct LightColors {
 
 struct LightColors PALETTES[] = {
   { 0xFFBF00, 0x000000 }, // amber
-  { 0x000000, 0xFF0000 }, // white
-  { 0xFF0000, 0xFF0000 }, // white with red
+  { 0x000000, 0x555555 }, // white
+  { 0xFF0000, 0x555555 }, // white with red
+  { 0x0000FF, 0x555555 }, // white with blue
   { 0xA0A0FF, 0x000000 }, // moonlight
   { 0xFF0000, 0x000000 }, // red
   { 0xFFFF00, 0x000000 }, // yellow
