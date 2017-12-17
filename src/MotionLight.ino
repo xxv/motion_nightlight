@@ -150,7 +150,7 @@ void handleSettingMode() {
   }
 
   if (buttonPressed) {
-    motion = true;
+    light_on = true;
     on_time = millis();
   }
 
