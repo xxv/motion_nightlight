@@ -1,3 +1,4 @@
+#include <avr/sleep.h>
 #include <FastLED.h>
 #include <Button.h>
 #include "apa102_dim.h"
@@ -77,6 +78,43 @@ APA102Controller_WithBrightness<PIN_A6, PIN_A4, BGR>ledController;
 
 Button button1(PIN_BUTTON_1, true, true, 20);
 Button button2(PIN_BUTTON_2, true, true, 20);
+
+ISR (PCINT0_vect) {
+  // Don't need to do anything, just wake up.
+}
+
+/**
+ * Enable Pin Change Interrupt on given pin number.
+ */
+void pciSetup(byte pin) {
+  bitSet(*digitalPinToPCMSK(pin), digitalPinToPCMSKbit(pin)); // enable pin
+  bitSet(*digitalPinToPCICR(pin), digitalPinToPCICRbit(pin)); // enable interrupt
+}
+
+/**
+ * Enable sleep mode and turn on pin change interrupt
+ */
+void sleep_now() {
+  setMode(sleeping);
+  redrawLights();
+  pciSetup(PIN_MOTION);
+
+  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+  sleep_enable();
+
+  // -.- zzz...
+  sleep_mode();
+
+  // !! O.O
+  sleep_disable();
+
+  disable_interrupts();
+}
+
+void disable_interrupts() {
+  bitClear(*digitalPinToPCICR(PIN_MOTION),
+            digitalPinToPCICRbit(PIN_MOTION));
+}
 
 void cycle_brightness_level() {
   brightness_idx = (brightness_idx + 1) %
@@ -253,8 +291,10 @@ void loop() {
 
     if (goingToSleep) {
       goingToSleep = false;
-      setMode(sleeping);
+      sleep_now();
     }
+  } else if (mode == sleeping) {
+    sleep_now();
   }
 
   delay(DIM_TIME);
