@@ -6,7 +6,7 @@ smidge = 0.1;
 // main interior volume
 interior = [94, 94, 32];
 // thickness of the wall material
-wall_size = 3;
+wall_size = 3.3;
 // distance between the top and the board
 board_z = 12.5;
 
@@ -64,7 +64,7 @@ module diffuser_stand_print() {
   translate([0, 0, stand_volume[2]])
   rotate([0, 180,0])
   diffuser_stand(stand_volume);
-  }
+}
 
 module enclosure_with_design(interior) {
   translate([0, 0, -(interior[2] - board_z)]) {
