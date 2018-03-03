@@ -324,22 +324,26 @@ module enclosure_2d(box_inner, thickness) {
   tab = thickness * 2;
   tabs = [tab, tab, tab];
 
+  offset_bottom_pieces = -box_inner[0] - thickness * 2.5;
   layout_2d(box_inner, thickness) {
     // Top
     empty();
 
     // Bottom
-    back_face(box_inner, thickness, tabs);
+    translate([offset_bottom_pieces, 0])
+      back_face(box_inner, thickness, tabs);
 
     // Left
-    difference() {
-      side_b(box_inner, thickness, tabs);
-    }
+    translate([0, offset_bottom_pieces])
+      difference() {
+        side_b(box_inner, thickness, tabs);
+      }
 
     // Right
-    difference() {
-      side_b(box_inner, thickness, tabs);
-    }
+    translate([0, offset_bottom_pieces])
+      difference() {
+        side_b(box_inner, thickness, tabs);
+      }
 
     // Front
     button_face(box_inner, thickness, tabs);
