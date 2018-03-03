@@ -43,7 +43,7 @@ stand_volume = interior + [0, 0, 1];
 mockup();
 
 /********* laser cut *********/
-* enclosure(interior, wall_size);
+* enclosure_2d(interior, wall_size);
 
 /********* 3D Print **********/
 * board_holder();
@@ -75,7 +75,7 @@ module enclosure_with_design(interior) {
       board_holder();
 
     color("SaddleBrown", alpha=1)
-      enclosure(interior, wall_size);
+      enclosure_3d(interior, wall_size);
   }
 }
 
@@ -208,52 +208,62 @@ module board_holder() {
           }
 }
 
-module enclosure(box_inner, thickness) {
-  tab = thickness * 2;
-  tabs = [tab, tab, tab];
-  button_offset = [9.25, 0];
-  button_hole_size = 2;
-
+module back_face(box_inner, thickness, tabs) {
   screw_hole_spacing = 70;
   screw_size = 3;
   screw_head_size = screw_size + 3;
 
-  // BEGIN 2D LAYOUT
-  //layout_2d(box_inner, thickness) {
-  // END 2D LAYOUT
+  difference() {
+    side_a(box_inner, thickness, tabs);
+    // Battery hole
+    translate(-battery_hole_offset)
+      translate([box_inner[0]/2 - battery_hole_size[0]/2,
+                 box_inner[1] - battery_hole_size[1]])
+        square(battery_hole_size);
 
-  // BEGIN 3D PREVIEW
+    // Screw holes
+    translate([box_inner[0]/2 - screw_hole_spacing/2, screw_head_size * 2, 0])
+      rotate([180])
+        screw_slot_2d(screw_head_size, screw_size, screw_head_size);
+
+    translate([box_inner[0]/2 + screw_hole_spacing/2, screw_head_size * 2, 0])
+      rotate([180])
+        screw_slot_2d(screw_head_size, screw_size, screw_head_size);
+
+    translate([interior[0]/2, 0])
+      for (m = [0 : 1 : 1])
+        mirror([m, 0, 0])
+          for (screw = wood_screws)
+            translate([0, interior[1]] - screw)
+              circle(r=laser_pilot_hole);
+  }
+}
+module button_face(box_inner, thickness, tabs) {
+  button_offset = [9.25, 0];
+  button_hole_size = 2;
+
+  difference() {
+    side_c(box_inner, thickness, tabs);
+
+    translate([box_inner[0] / 2, box_inner[2] - (board_z - 4.4)]) {
+      translate(-button_offset)
+        circle(r=button_hole_size);
+
+      translate(button_offset)
+        circle(r=button_hole_size);
+      }
+  }
+}
+module enclosure_3d(box_inner, thickness) {
+  tab = thickness * 2;
+  tabs = [tab, tab, tab];
+
   layout_3d(box_inner, thickness) {
-  // END 3D PREVIEW
-
     // Top
     empty();
 
     // Bottom
-    difference() {
-      side_a(box_inner, thickness, tabs);
-      // Battery hole
-      translate(-battery_hole_offset)
-        translate([box_inner[0]/2 - battery_hole_size[0]/2,
-                   box_inner[1] - battery_hole_size[1]])
-          square(battery_hole_size);
-
-      // Screw holes
-      translate([box_inner[0]/2 - screw_hole_spacing/2, screw_head_size * 2, 0])
-        rotate([180])
-          screw_slot_2d(screw_head_size, screw_size, screw_head_size);
-
-      translate([box_inner[0]/2 + screw_hole_spacing/2, screw_head_size * 2, 0])
-        rotate([180])
-          screw_slot_2d(screw_head_size, screw_size, screw_head_size);
-
-      translate([interior[0]/2, 0])
-        for (m = [0 : 1 : 1])
-          mirror([m, 0, 0])
-            for (screw = wood_screws)
-              translate([0, interior[1]] - screw)
-                circle(r=laser_pilot_hole);
-    }
+    back_face(box_inner, thickness, tabs);
 
     // Left
     difference() {
@@ -266,17 +276,38 @@ module enclosure(box_inner, thickness) {
     }
 
     // Front
+    button_face(box_inner, thickness, tabs);
+
+    // Back
     difference() {
       side_c(box_inner, thickness, tabs);
-
-      translate([box_inner[0] / 2, box_inner[2] - (board_z - 4.4)]) {
-        translate(-button_offset)
-          circle(r=button_hole_size);
-
-        translate(button_offset)
-          circle(r=button_hole_size);
-        }
     }
+  }
+}
+
+module enclosure_2d(box_inner, thickness) {
+  tab = thickness * 2;
+  tabs = [tab, tab, tab];
+
+  layout_2d(box_inner, thickness) {
+    // Top
+    empty();
+
+    // Bottom
+    back_face(box_inner, thickness, tabs);
+
+    // Left
+    difference() {
+      side_b(box_inner, thickness, tabs);
+    }
+
+    // Right
+    difference() {
+      side_b(box_inner, thickness, tabs);
+    }
+
+    // Front
+    button_face(box_inner, thickness, tabs);
 
     // Back
     difference() {
