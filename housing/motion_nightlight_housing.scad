@@ -19,6 +19,7 @@ board_hole_offset = 4;
 
 battery_hole_size = [46, 55];
 battery_hole_offset = [0, 3];
+battery_finger_size = 10;
 // holes to screw plate into the wood
 laser_pilot_hole = 1.33/2;
 
@@ -47,6 +48,7 @@ mockup();
 
 /********* 3D Print **********/
 * board_holder();
+* battery_plate();
 * grate();
 * diffuser_stand_print();
   // This can be a knife template for cutting the diffuser material
@@ -62,8 +64,8 @@ module mockup() {
 
 module diffuser_stand_print() {
   translate([0, 0, stand_volume[2]])
-  rotate([0, 180,0])
-  diffuser_stand(stand_volume);
+    rotate([0, 180,0])
+      diffuser_stand(stand_volume);
 }
 
 module enclosure_with_design(interior) {
@@ -71,8 +73,10 @@ module enclosure_with_design(interior) {
     translate([0, 0, stand_volume[2]])
       diffuser_and_grate(stand_volume);
 
-    color([0.5, 0.5, 0.5])
+    color([0.5, 0.5, 0.5]) {
       board_holder();
+      battery_plate();
+    }
 
     color("SaddleBrown", alpha=1)
       enclosure_3d(interior, wall_size);
@@ -96,11 +100,11 @@ module diffuser_and_grate(inner_size) {
 }
 
 module diffuser_stand(inner_size) {
-  inset = 2.2;
+  diffuser_inset = 2.2;
   intersection() {
     difference() {
       cube(inner_size);
-      inset_size = inner_size - [inset * 2, inset * 2, -1];
+      inset_size = inner_size - [diffuser_inset * 2, diffuser_inset * 2, -1];
       translate((inner_size - inset_size)/2)
       cube(inset_size);
     }
@@ -208,6 +212,27 @@ module board_holder() {
           }
 }
 
+module battery_plate() {
+  battery_plate_wall = [2, 2, 0];
+  inset_for_mating = 0.2;
+  extra_inset = [inset * 2 + inset_for_mating, inset * 2 + inset_for_mating, 0];
+  wall_thickness = 1;
+  plate_thickness = 0.5;
+  battery_hole = [battery_hole_size[0],
+                  battery_hole_size[1],
+                  wall_thickness + plate_thickness] - extra_inset;
+
+      translate(battery_hole_offset)
+        translate([interior[0]/2 - battery_hole_size[0]/2, 0, 0] + extra_inset/2)
+          difference() {
+            cube(battery_hole);
+            translate(battery_plate_wall/2 - [0, 0, -plate_thickness])
+              cube(battery_hole - (battery_plate_wall + [0, 0, -3]));
+            translate([(battery_hole_size[0] - extra_inset[0])/2, battery_hole_size[1] - extra_inset[1]/2, -1])
+              cylinder(d=battery_finger_size, h=wall_thickness + plate_thickness + 2);
+          }
+}
+
 module back_face(box_inner, thickness, tabs) {
   screw_hole_spacing = 70;
   screw_size = 3;
@@ -219,7 +244,17 @@ module back_face(box_inner, thickness, tabs) {
     translate(-battery_hole_offset)
       translate([box_inner[0]/2 - battery_hole_size[0]/2,
                  box_inner[1] - battery_hole_size[1]])
-        square(battery_hole_size);
+        difference() {
+          square(battery_hole_size);
+
+          difference() {
+            translate([smidge, smidge])
+              square(battery_hole_size - [smidge * 2, smidge * 2]);
+
+              translate([battery_hole_size[0]/2, 0])
+              circle(d=battery_finger_size);
+          }
+        }
 
     // Screw holes
     translate([box_inner[0]/2 - screw_hole_spacing/2, screw_head_size * 2, 0])
