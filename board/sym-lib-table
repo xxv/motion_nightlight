@@ -1,0 +1,5 @@
+(sym_lib_table
+  (lib (name motion_light-rescue)(type Legacy)(uri ${KIPRJMOD}/motion_light-rescue.lib)(options "")(descr ""))
+  (lib (name crumpschemes)(type Legacy)(uri /home/steve/kicad/library/CrumpSchemes/crumpschemes.lib)(options "")(descr ""))
+  (lib (name steve_parts)(type Legacy)(uri /home/steve/kicad/library/steve_parts.lib)(options "")(descr ""))
+)

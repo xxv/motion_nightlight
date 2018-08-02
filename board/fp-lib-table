@@ -1,0 +1,4 @@
+(fp_lib_table
+  (lib (name CrumpPrints)(type KiCad)(uri ${HOME}/kicad/modules/CrumpPrints.pretty)(options "")(descr ""))
+  (lib (name StaticfreeFootprints)(type KiCad)(uri ${HOME}/kicad/modules/StaticfreeFootprints.pretty)(options "")(descr ""))
+)
