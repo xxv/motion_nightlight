@@ -3,17 +3,8 @@
 #include <Button.h>
 #include "apa102_dim.h"
 
-#define PIN_A0  0
-#define PIN_A1  1
-#define PIN_A2  2
-#define PIN_A3  3
-#define PIN_A4  4
-#define PIN_A5  5
-#define PIN_A6  6
-#define PIN_A7  7
-#define PIN_B0 10
-#define PIN_B1  9
-#define PIN_B2  8
+// #define DEBUG_MOTION
+// #define DEBUG_AMBIENT
 
 const static uint8_t BRIGHTNESS_LEVELS[] = { 16, 32, 64, 128, 255 };
 
@@ -39,11 +30,14 @@ struct LightColors PALETTES[] = {
 // the number of milliseconds to delay the main animation loop
 const static int DIM_TIME       = 100;
 
-const static int PIN_MOTION     = PIN_A0;
-const static int PIN_AMBIENT    = PIN_A1;
-const static int PIN_STATUS_LED = PIN_A2;
-const static int PIN_BUTTON_1   = PIN_B2;
-const static int PIN_BUTTON_2   = PIN_B1;
+const static int PIN_MOTION      = PIN_A0;
+const static int PIN_AMBIENT     = A1;
+const static int PIN_STATUS_LED  = PIN_A2;
+const static int PIN_ACC_PWR_DIS = PIN_A3;
+const static int PIN_BUTTON_1    = PIN_B2;
+const static int PIN_BUTTON_2    = PIN_B1;
+const static int PIN_SCK         = 4;
+const static int PIN_SDA         = 6;
 
 const static int NUM_LEDS       = 2;
 const static int RGB_LED        = 0;
@@ -74,7 +68,7 @@ enum Mode { sleeping, running, setting };
 
 Mode mode = sleeping;
 
-APA102Controller_WithBrightness<PIN_A6, PIN_A4, BGR>ledController;
+APA102Controller_WithBrightness<PIN_SDA, PIN_SCK, BGR>ledController;
 
 Button button1(PIN_BUTTON_1, true, true, 20);
 Button button2(PIN_BUTTON_2, true, true, 20);
@@ -151,10 +145,12 @@ void setup() {
   pinMode(PIN_MOTION, INPUT);
   pinMode(PIN_AMBIENT, INPUT);
   pinMode(PIN_STATUS_LED, OUTPUT);
+  pinMode(PIN_ACC_PWR_DIS, OUTPUT);
   FastLED.addLeds((CLEDController*) &ledController, leds, NUM_LEDS);
 
   led_test();
   digitalWrite(PIN_STATUS_LED, LOW);
+  digitalWrite(PIN_ACC_PWR_DIS, LOW);
 }
 
 void setMode(Mode newMode) {
@@ -267,6 +263,10 @@ void loop() {
       handleSettingMode();
       break;
   }
+
+#ifdef DEBUG_AMBIENT
+  digitalWrite(PIN_STATUS_LED, is_dark_enough);
+#endif
 
 #ifdef DEBUG_MOTION
   digitalWrite(PIN_STATUS_LED, motion);
