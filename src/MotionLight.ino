@@ -86,7 +86,7 @@ ISR (WDT_vect) {
 #endif
 }
 
-void watchdog_setup() {
+void watchdog_enable() {
 #ifdef DEBUG_WATCHDOG
   digitalWrite(PIN_STATUS_LED, LOW);
 #endif
@@ -110,7 +110,7 @@ void pciSetup(byte pin) {
 void sleep_now() {
   setMode(sleeping);
   redrawLights();
-  watchdog_setup();
+  watchdog_enable();
   pciSetup(PIN_MOTION);
 
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);
