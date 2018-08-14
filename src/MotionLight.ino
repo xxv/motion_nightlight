@@ -7,7 +7,7 @@
 // #define DEBUG_AMBIENT
 // #define DEBUG_WATCHDOG
 
-const static uint8_t BRIGHTNESS_LEVELS[] = { 16, 32, 64, 128, 255 };
+const static uint8_t BRIGHTNESS_LEVELS[] = { 2, 4, 8, 16, 31 };
 
 struct LightColors {
   long rgb;
@@ -19,6 +19,8 @@ struct LightColors PALETTES[] = {
   { 0x000000, 0x555555 }, // white
   { 0xFF0000, 0x555555 }, // white with red
   { 0x0000FF, 0x555555 }, // white with blue
+  { 0x000000, 0xAAAAAA }, // bright white
+  { 0x000000, 0xFFFFFF }, // max white
   { 0xA0A0FF, 0x000000 }, // moonlight
   { 0xFF0000, 0x000000 }, // red
   { 0xFFFF00, 0x000000 }, // yellow
@@ -27,9 +29,6 @@ struct LightColors PALETTES[] = {
   { 0x0000FF, 0x000000 }, // blue
   { 0xFF00FF, 0x000000 }, // purple
 };
-
-// the number of milliseconds to delay the main animation loop
-const static int DIM_TIME       = 100;
 
 const static int PIN_MOTION      = PIN_A0;
 const static int PIN_AMBIENT     = A1;
@@ -134,7 +133,6 @@ void disable_interrupts() {
 void cycle_brightness_level() {
   brightness_idx = (brightness_idx + 1) %
       (sizeof(BRIGHTNESS_LEVELS)/sizeof(BRIGHTNESS_LEVELS[0]));
-  update_color = true;
 }
 
 void cycle_palette() {
@@ -226,7 +224,8 @@ void check_buttons() {
     led_test();
   } else if (button1.wasPressed() || button2.wasPressed()) {
     motion = true;
-    fade_value = APA102_MAXIMUM_BRIGHTNESS;
+    fade_value = 255;
+    update_color = true;
     setMode(setting);
   }
 }
@@ -248,43 +247,44 @@ void handleRunningMode() {
 }
 
 void redrawLights() {
+  ledController.setAPA102Brightness(BRIGHTNESS_LEVELS[brightness_idx]);
+
   if (update_color) {
     leds[RGB_LED] = PALETTES[palette_idx].rgb;
     leds[WHITE_LED] = PALETTES[palette_idx].white;
-
-    leds[RGB_LED].nscale8_video(BRIGHTNESS_LEVELS[brightness_idx]);
-    leds[WHITE_LED].nscale8_video(BRIGHTNESS_LEVELS[brightness_idx]);
+    leds[RGB_LED].nscale8_video(fade_value);
+    leds[WHITE_LED].nscale8_video(fade_value);
     update_color = false;
   }
-
-  ledController.setAPA102Brightness(fade_value);
 
   FastLED.show();
 }
 
 void loop() {
-  button1.read();
-  button2.read();
+  EVERY_N_MILLIS(10) {
+    button1.read();
+    button2.read();
 
   digitalWrite(PIN_ACC_PWR_DIS, LOW);
   motion = digitalRead(PIN_MOTION);
   is_dark_enough = analogRead(PIN_AMBIENT) <= AMBIENT_DARKNESS_LEVEL;
   digitalWrite(PIN_ACC_PWR_DIS, HIGH);
 
-  switch (mode) {
-    case sleeping:
-      if (motion && is_dark_enough) {
-        setMode(running);
-      }
-      check_buttons();
-      break;
-    case running:
-      check_buttons();
-      handleRunningMode();
-      break;
-    case setting:
-      handleSettingMode();
-      break;
+    switch (mode) {
+      case sleeping:
+        if (motion && is_dark_enough) {
+          setMode(running);
+        }
+        check_buttons();
+        break;
+      case running:
+        check_buttons();
+        handleRunningMode();
+        break;
+      case setting:
+        handleSettingMode();
+        break;
+    }
   }
 
 #ifdef DEBUG_AMBIENT
@@ -302,14 +302,17 @@ void loop() {
       goingToSleep = true;
     }
 
-    EVERY_N_MILLIS(16) {
+    EVERY_N_MILLIS(2) {
       fade_value += light_on ? 2 : -1;
+      update_color = true;
     }
 
     if (fade_value < 0) {
       fade_value = 0;
-    } else if (fade_value > APA102_MAXIMUM_BRIGHTNESS) {
-      fade_value = APA102_MAXIMUM_BRIGHTNESS;
+      update_color = true;
+    } else if (fade_value > 255) {
+      fade_value = 255;
+      update_color = true;
     }
 
     if (goingToSleep) {
@@ -320,5 +323,5 @@ void loop() {
     sleep_now();
   }
 
-  delay(DIM_TIME);
+  delay(1);
 }
