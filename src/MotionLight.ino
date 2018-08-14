@@ -5,6 +5,7 @@
 
 // #define DEBUG_MOTION
 // #define DEBUG_AMBIENT
+// #define DEBUG_WATCHDOG
 
 const static uint8_t BRIGHTNESS_LEVELS[] = { 16, 32, 64, 128, 255 };
 
@@ -77,6 +78,25 @@ ISR (PCINT0_vect) {
   // Don't need to do anything, just wake up.
 }
 
+ISR (WDT_vect) {
+  MCUSR = 0x00;
+  WDTCSR |= _BV(WDE) | _BV(WDCE);
+  WDTCSR = 0x00; // disable watchdog
+#ifdef DEBUG_WATCHDOG
+  digitalWrite(PIN_STATUS_LED, HIGH);
+#endif
+}
+
+void watchdog_setup() {
+#ifdef DEBUG_WATCHDOG
+  digitalWrite(PIN_STATUS_LED, LOW);
+#endif
+  bitSet(WDTCSR, WDIE);           // watchdog triggers an interrupt
+  WDTCSR |= _BV(WDP0) | _BV(WDP1) | _BV(WDP2); // trigger every 2 seconds
+
+  bitSet(WDTCSR, WDE); // enable watchdog
+}
+
 /**
  * Enable Pin Change Interrupt on given pin number.
  */
@@ -91,6 +111,7 @@ void pciSetup(byte pin) {
 void sleep_now() {
   setMode(sleeping);
   redrawLights();
+  watchdog_setup();
   pciSetup(PIN_MOTION);
 
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);
@@ -150,7 +171,7 @@ void setup() {
 
   led_test();
   digitalWrite(PIN_STATUS_LED, LOW);
-  digitalWrite(PIN_ACC_PWR_DIS, LOW);
+  digitalWrite(PIN_ACC_PWR_DIS, HIGH);
 }
 
 void setMode(Mode newMode) {
@@ -245,8 +266,10 @@ void loop() {
   button1.read();
   button2.read();
 
+  digitalWrite(PIN_ACC_PWR_DIS, LOW);
   motion = digitalRead(PIN_MOTION);
   is_dark_enough = analogRead(PIN_AMBIENT) <= AMBIENT_DARKNESS_LEVEL;
+  digitalWrite(PIN_ACC_PWR_DIS, HIGH);
 
   switch (mode) {
     case sleeping:
