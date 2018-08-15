@@ -47,7 +47,8 @@ const static long TIMEOUT_MS         = 10000;
 const static long SETTING_TIMEOUT_MS = 5000;
 const static long LONG_PRESS_MS      = 1000;
 
-const static int AMBIENT_DARKNESS_LEVEL = 100;
+const static int AMBIENT_DARKNESS_LEVEL = 50;
+const static int AMBIENT_HYSTERESIS = 10;
 
 // transient state
 long on_time = 0;
@@ -260,15 +261,24 @@ void redrawLights() {
   FastLED.show();
 }
 
+void update_ambient_level() {
+  if (is_dark_enough) {
+    is_dark_enough = analogRead(PIN_AMBIENT) <=
+    (AMBIENT_DARKNESS_LEVEL + AMBIENT_HYSTERESIS);
+  } else {
+    is_dark_enough = analogRead(PIN_AMBIENT) <=
+     (AMBIENT_DARKNESS_LEVEL - AMBIENT_HYSTERESIS);
+  }
+}
+
 void loop() {
   EVERY_N_MILLIS(10) {
     button1.read();
     button2.read();
 
-  digitalWrite(PIN_ACC_PWR_DIS, LOW);
-  motion = digitalRead(PIN_MOTION);
-  is_dark_enough = analogRead(PIN_AMBIENT) <= AMBIENT_DARKNESS_LEVEL;
-  digitalWrite(PIN_ACC_PWR_DIS, HIGH);
+    digitalWrite(PIN_ACC_PWR_DIS, LOW);
+    motion = digitalRead(PIN_MOTION);
+    update_ambient_level();
 
     switch (mode) {
       case sleeping:
