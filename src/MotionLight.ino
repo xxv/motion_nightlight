@@ -1,4 +1,5 @@
 #include <avr/sleep.h>
+#include <EEPROM.h>
 #include <FastLED.h>
 #include <Button.h>
 #include "apa102_dim.h"
@@ -16,13 +17,20 @@ struct LightColors {
   long white;
 };
 
+struct SettingsData {
+  uint8_t brightness_level_idx;
+  uint8_t palette_idx;
+};
+
+const static uint8_t SETTINGS_ADDRESS = 0;
+
 const struct LightColors PALETTES[] = {
   { 0xFFBF00, 0x000000 }, // amber
   { 0x000000, 0x555555 }, // white
-  { 0xFF0000, 0x555555 }, // white with red
-  { 0x0000FF, 0x555555 }, // white with blue
   { 0x000000, 0xAAAAAA }, // bright white
   { 0x000000, 0xFFFFFF }, // max white
+  { 0xFF0000, 0x555555 }, // white with red
+  { 0x0000FF, 0x555555 }, // white with blue
   { 0xA0A0FF, 0x000000 }, // moonlight
   { 0xFF0000, 0x000000 }, // red
   { 0xFFFF00, 0x000000 }, // yellow
@@ -191,6 +199,23 @@ void disable_pc_interrupts() {
   disable_pc_interrupts(PIN_BUTTON_2);
 }
 
+void load_settings() {
+  SettingsData data;
+  EEPROM.get(SETTINGS_ADDRESS, data);
+
+  set_brightness_level(data.brightness_level_idx);
+  set_palette(data.palette_idx);
+}
+
+void save_settings() {
+  SettingsData data = {
+    brightness_idx,
+    palette_idx
+  };
+
+  EEPROM.put(SETTINGS_ADDRESS, data);
+}
+
 void cycle_brightness_level() {
   set_brightness_level(brightness_idx + 1);
 }
@@ -203,8 +228,11 @@ void set_brightness_level(uint8_t index) {
 }
 
 void cycle_palette() {
-  palette_idx = (palette_idx + 1) %
-      (sizeof(PALETTES)/sizeof(PALETTES[0]));
+  set_palette(palette_idx + 1);
+}
+
+void set_palette(uint8_t index) {
+  palette_idx = index % (sizeof(PALETTES)/sizeof(PALETTES[0]));
   update_color = true;
 }
 
@@ -236,7 +264,8 @@ void setup() {
 
   set_accessory_powered(true);
   led_test();
-  set_brightness_level(0);
+
+  load_settings();
   digitalWrite(PIN_STATUS_LED, LOW);
 }
 
@@ -265,6 +294,7 @@ void handleSettingMode() {
   }
 
   if ((millis() - on_time) > SETTING_TIMEOUT_MS) {
+    save_settings();
     setMode(running);
   }
 }
