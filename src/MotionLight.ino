@@ -3,9 +3,11 @@
 #include <Button.h>
 #include "apa102_dim.h"
 
-// #define DEBUG_MOTION
-// #define DEBUG_AMBIENT
-// #define DEBUG_WATCHDOG
+//#define DEBUG_MOTION
+//#define DEBUG_AMBIENT
+//#define DEBUG_WATCHDOG
+//#define DEBUG_ACCESSORY_POWER
+//#define DEBUG_SLEEPING
 
 const static uint8_t BRIGHTNESS_LEVELS[] = { 2, 4, 8, 16, 31 };
 
@@ -14,7 +16,7 @@ struct LightColors {
   long white;
 };
 
-struct LightColors PALETTES[] = {
+const struct LightColors PALETTES[] = {
   { 0xFFBF00, 0x000000 }, // amber
   { 0x000000, 0x555555 }, // white
   { 0xFF0000, 0x555555 }, // white with red
@@ -43,31 +45,40 @@ const static int NUM_LEDS       = 2;
 const static int RGB_LED        = 0;
 const static int WHITE_LED      = 1;
 
-const static long TIMEOUT_MS         = 10000;
-const static long SETTING_TIMEOUT_MS = 5000;
-const static long LONG_PRESS_MS      = 1000;
+const static uint8_t DEEP_SLEEP_TIMEOUT_COUNT = 5; // number of watchdog wakes
+const static unsigned long TIMEOUT_MS         = 5000;
+const static long SETTING_TIMEOUT_MS    = 5000;
+const static long LONG_PRESS_MS         = 1000;
 
 const static int AMBIENT_DARKNESS_LEVEL = 50;
 const static int AMBIENT_HYSTERESIS = 10;
 
 // transient state
-long on_time = 0;
+unsigned long on_time = 0;
 CRGB leds[NUM_LEDS];
 
-int fade_value = 0;
+uint8_t deep_sleep_countdown = 0;
+bool should_sleep = false;
+uint8_t fade_value = 0;
+uint8_t prev_fade_value = 0;
 bool motion = false;
 bool is_dark_enough = false;
 bool light_on = false;
-bool goingToSleep = false;
 bool update_color = true;
+bool woke_from_watchdog = false;
 
 
 uint8_t brightness_idx = 0;
 uint8_t palette_idx = 0;
 
-enum Mode { sleeping, running, setting };
+/**
+ * sleeping = low power, wake via motion
+ * deep_sleeping = lowest power, wake via being dark
+ * running = light is fading on/off/steady on
+ */
+enum Mode { sleeping, deep_sleeping, running, setting };
 
-Mode mode = sleeping;
+Mode mode = running;
 
 APA102Controller_WithBrightness<PIN_SDA, PIN_SCK, BGR>ledController;
 
@@ -78,6 +89,10 @@ ISR (PCINT0_vect) {
   // Don't need to do anything, just wake up.
 }
 
+ISR (PCINT1_vect) {
+  // Don't need to do anything, just wake up.
+}
+
 ISR (WDT_vect) {
   MCUSR = 0x00;
   WDTCSR |= _BV(WDE) | _BV(WDCE);
@@ -85,6 +100,7 @@ ISR (WDT_vect) {
 #ifdef DEBUG_WATCHDOG
   digitalWrite(PIN_STATUS_LED, HIGH);
 #endif
+  woke_from_watchdog = true;
 }
 
 void watchdog_enable() {
@@ -95,6 +111,26 @@ void watchdog_enable() {
   WDTCSR |= _BV(WDP0) | _BV(WDP1) | _BV(WDP2); // trigger every 2 seconds
 
   bitSet(WDTCSR, WDE); // enable watchdog
+}
+
+void set_accessory_powered(bool is_powered) {
+  digitalWrite(PIN_ACC_PWR_DIS, !is_powered);
+
+#ifdef DEBUG_ACCESSORY_POWER
+  digitalWrite(PIN_STATUS_LED, is_powered);
+#endif
+}
+
+void update_deep_sleep_monitoring() {
+  if (is_dark_enough) {
+    deep_sleep_countdown = 0;
+  } else {
+    deep_sleep_countdown++;
+  }
+}
+
+bool should_deep_sleep() {
+  return deep_sleep_countdown >= DEEP_SLEEP_TIMEOUT_COUNT;
 }
 
 /**
@@ -108,32 +144,62 @@ void pciSetup(byte pin) {
 /**
  * Enable sleep mode and turn on pin change interrupt
  */
-void sleep_now() {
-  setMode(sleeping);
-  redrawLights();
-  watchdog_enable();
-  pciSetup(PIN_MOTION);
+void sleep_now(bool deep_sleep) {
+  redraw_lights();
 
+  woke_from_watchdog = false;
+  watchdog_enable();
+
+  if (deep_sleep) {
+    deep_sleep_countdown = 0;
+    set_accessory_powered(false);
+  } else {
+    pciSetup(PIN_MOTION);
+  }
+
+  pciSetup(PIN_BUTTON_1);
+  pciSetup(PIN_BUTTON_2);
+
+  setMode(deep_sleep ? deep_sleeping : sleeping);
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);
   sleep_enable();
 
+#ifdef DEBUG_SLEEPING
+  digitalWrite(PIN_STATUS_LED, LOW);
+#endif
   // -.- zzz...
   sleep_mode();
 
   // !! O.O
   sleep_disable();
 
-  disable_interrupts();
+#ifdef DEBUG_SLEEPING
+  digitalWrite(PIN_STATUS_LED, HIGH);
+#endif
+
+  disable_pc_interrupts();
+  interrupts();
 }
 
-void disable_interrupts() {
-  bitClear(*digitalPinToPCICR(PIN_MOTION),
-            digitalPinToPCICRbit(PIN_MOTION));
+void disable_pc_interrupts(byte pin) {
+  bitClear(*digitalPinToPCICR(pin), digitalPinToPCICRbit(pin));
+}
+
+void disable_pc_interrupts() {
+  disable_pc_interrupts(PIN_MOTION);
+  disable_pc_interrupts(PIN_BUTTON_1);
+  disable_pc_interrupts(PIN_BUTTON_2);
 }
 
 void cycle_brightness_level() {
-  brightness_idx = (brightness_idx + 1) %
+  set_brightness_level(brightness_idx + 1);
+}
+
+void set_brightness_level(uint8_t index) {
+  brightness_idx = index %
       (sizeof(BRIGHTNESS_LEVELS)/sizeof(BRIGHTNESS_LEVELS[0]));
+
+  ledController.setAPA102Brightness(BRIGHTNESS_LEVELS[brightness_idx]);
 }
 
 void cycle_palette() {
@@ -168,27 +234,10 @@ void setup() {
   pinMode(PIN_ACC_PWR_DIS, OUTPUT);
   FastLED.addLeds((CLEDController*) &ledController, leds, NUM_LEDS);
 
+  set_accessory_powered(true);
   led_test();
+  set_brightness_level(0);
   digitalWrite(PIN_STATUS_LED, LOW);
-  digitalWrite(PIN_ACC_PWR_DIS, HIGH);
-}
-
-void setMode(Mode newMode) {
-  mode = newMode;
-
-  switch (mode) {
-    case sleeping:
-    case running:
-#ifndef DEBUG_MOTION
-      digitalWrite(PIN_STATUS_LED, LOW);
-#endif
-      break;
-    case setting:
-#ifndef DEBUG_MOTION
-      digitalWrite(PIN_STATUS_LED, HIGH);
-#endif
-      break;
-  }
 }
 
 void handleSettingMode() {
@@ -201,7 +250,7 @@ void handleSettingMode() {
     cycle_palette();
     buttonPressed = true;
   } else if (button1.pressedFor(LONG_PRESS_MS)) {
-    brightness_idx = 0;
+    set_brightness_level(0);
     update_color = true;
     buttonPressed = true;
   } else if (button2.pressedFor(LONG_PRESS_MS)) {
@@ -247,9 +296,7 @@ void handleRunningMode() {
   }
 }
 
-void redrawLights() {
-  ledController.setAPA102Brightness(BRIGHTNESS_LEVELS[brightness_idx]);
-
+void redraw_lights() {
   if (update_color) {
     leds[RGB_LED] = PALETTES[palette_idx].rgb;
     leds[WHITE_LED] = PALETTES[palette_idx].white;
@@ -271,19 +318,61 @@ void update_ambient_level() {
   }
 }
 
+void manage_power() {
+  if (mode == running) {
+    if (!light_on && fade_value == 0) {
+      should_sleep = true;
+    }
+
+    if (should_sleep) {
+      should_sleep = false;
+      sleep_now(false);
+    }
+  } else if (mode == deep_sleeping) {
+    sleep_now(!is_dark_enough);
+  } else if (mode == sleeping) {
+    sleep_now(should_deep_sleep());
+  }
+}
+
+void setMode(Mode newMode) {
+  if (mode != newMode) {
+    mode = newMode;
+
+    switch (mode) {
+      case deep_sleeping:
+        // fall through
+      case sleeping:
+        // fall through
+      case running:
+        digitalWrite(PIN_STATUS_LED, LOW);
+        break;
+      case setting:
+        digitalWrite(PIN_STATUS_LED, HIGH);
+        break;
+    }
+  }
+}
+
 void loop() {
   EVERY_N_MILLIS(10) {
     button1.read();
     button2.read();
 
-    digitalWrite(PIN_ACC_PWR_DIS, LOW);
+    set_accessory_powered(true);
     motion = digitalRead(PIN_MOTION);
     update_ambient_level();
 
     switch (mode) {
       case sleeping:
+        if (woke_from_watchdog) {
+          update_deep_sleep_monitoring();
+        }
+        // fall through
+      case deep_sleeping:
         if (motion && is_dark_enough) {
           setMode(running);
+          handleRunningMode();
         }
         check_buttons();
         break;
@@ -305,33 +394,23 @@ void loop() {
   digitalWrite(PIN_STATUS_LED, motion);
 #endif
 
-  redrawLights();
+  EVERY_N_MILLIS(2) {
+    prev_fade_value = fade_value;
 
-  if (mode == running) {
-    if (!light_on && fade_value == 1) {
-      goingToSleep = true;
+    if (light_on) {
+      fade_value = qadd8(fade_value, 2);
+    } else {
+      fade_value = qsub8(fade_value, 1);
     }
 
-    EVERY_N_MILLIS(2) {
-      fade_value += light_on ? 2 : -1;
+    if (prev_fade_value != fade_value) {
       update_color = true;
     }
-
-    if (fade_value < 0) {
-      fade_value = 0;
-      update_color = true;
-    } else if (fade_value > 255) {
-      fade_value = 255;
-      update_color = true;
-    }
-
-    if (goingToSleep) {
-      goingToSleep = false;
-      sleep_now();
-    }
-  } else if (mode == sleeping) {
-    sleep_now();
   }
+
+  redraw_lights();
+
+  manage_power();
 
   delay(1);
 }
