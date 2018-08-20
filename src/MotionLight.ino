@@ -1,3 +1,4 @@
+#include <avr/power.h>
 #include <avr/sleep.h>
 #include <EEPROM.h>
 #include <FastLED.h>
@@ -175,11 +176,15 @@ void sleep_now(bool deep_sleep) {
 #ifdef DEBUG_SLEEPING
   digitalWrite(PIN_STATUS_LED, LOW);
 #endif
+  bitClear(ADCSRA, ADEN); // disable ADC
+
   // -.- zzz...
   sleep_mode();
 
   // !! O.O
   sleep_disable();
+
+  bitSet(ADCSRA, ADEN); // re-enable ADC
 
 #ifdef DEBUG_SLEEPING
   digitalWrite(PIN_STATUS_LED, HIGH);
