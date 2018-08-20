@@ -49,17 +49,17 @@ $EndComp
 $Comp
 L MCU_Microchip_ATtiny:ATtiny84A-SSU U1
 U 1 1 59B43E7D
-P 10000 2800
-F 0 "U1" H 9150 3550 50  0000 C CNN
-F 1 "ATTINY84A-SSU" H 10000 2800 50  0000 C CNN
-F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 10000 2600 50  0001 C CIN
-F 3 "http://www.microchip.com/mymicrochip/filehandler.aspx?ddocname=en590190" H 10000 2800 50  0001 C CNN
-F 4 "Microchip Technology" H 450 200 50  0001 C CNN "MFR"
-F 5 "ATTINY84A-SSUR" H 450 200 50  0001 C CNN "MPN"
-F 6 "Digikey" H 450 200 50  0001 C CNN "SPR"
-F 7 "ATTINY84A-SSURCT-ND" H 450 200 50  0001 C CNN "SPN"
-F 8 "-" H 450 200 50  0001 C CNN "SPURL"
-	1    10000 2800
+P 9700 2800
+F 0 "U1" H 8850 3550 50  0000 C CNN
+F 1 "ATTINY84A-SSU" H 9700 2800 50  0000 C CNN
+F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 9700 2600 50  0001 C CIN
+F 3 "http://www.microchip.com/mymicrochip/filehandler.aspx?ddocname=en590190" H 9700 2800 50  0001 C CNN
+F 4 "Microchip Technology" H 150 200 50  0001 C CNN "MFR"
+F 5 "ATTINY84A-SSUR" H 150 200 50  0001 C CNN "MPN"
+F 6 "Digikey" H 150 200 50  0001 C CNN "SPR"
+F 7 "ATTINY84A-SSURCT-ND" H 150 200 50  0001 C CNN "SPN"
+F 8 "-" H 150 200 50  0001 C CNN "SPURL"
+	1    9700 2800
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -108,23 +108,23 @@ $EndComp
 $Comp
 L power:VCC #PWR02
 U 1 1 59B443A5
-P 10000 1900
-F 0 "#PWR02" H 10000 1750 50  0001 C CNN
-F 1 "VCC" H 10000 2050 50  0000 C CNN
-F 2 "" H 10000 1900 50  0001 C CNN
-F 3 "" H 10000 1900 50  0001 C CNN
-	1    10000 1900
+P 9700 1900
+F 0 "#PWR02" H 9700 1750 50  0001 C CNN
+F 1 "VCC" H 9700 2050 50  0000 C CNN
+F 2 "" H 9700 1900 50  0001 C CNN
+F 3 "" H 9700 1900 50  0001 C CNN
+	1    9700 1900
 	1    0    0    -1  
 $EndComp
 $Comp
 L power:GND #PWR03
 U 1 1 59B443C3
-P 10000 3700
-F 0 "#PWR03" H 10000 3450 50  0001 C CNN
-F 1 "GND" H 10000 3550 50  0000 C CNN
-F 2 "" H 10000 3700 50  0001 C CNN
-F 3 "" H 10000 3700 50  0001 C CNN
-	1    10000 3700
+P 9700 3700
+F 0 "#PWR03" H 9700 3450 50  0001 C CNN
+F 1 "GND" H 9700 3550 50  0000 C CNN
+F 2 "" H 9700 3700 50  0001 C CNN
+F 3 "" H 9700 3700 50  0001 C CNN
+	1    9700 3700
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -421,19 +421,19 @@ F 8 "-" H -50 300 50  0001 C CNN "SPURL"
 $EndComp
 Text Label 5050 750  0    60   ~ 0
 BUTTON1
-Text Label 11150 2600 2    60   ~ 0
+Text Label 11000 2600 2    60   ~ 0
 SCK
 Text Label 8450 950  0    60   ~ 0
 SDA
 Text Label 8450 1100 0    60   ~ 0
 SCK
-Text Label 11150 2800 2    60   ~ 0
+Text Label 11000 2800 2    60   ~ 0
 SDA
-Text Label 11150 3300 2    60   ~ 0
+Text Label 11000 3300 2    60   ~ 0
 BUTTON1
 Text Label 8200 950  2    60   ~ 0
 MOTION
-Text Label 11150 2200 2    60   ~ 0
+Text Label 11000 2200 2    60   ~ 0
 MOTION
 Text Label 8000 2650 2    60   ~ 0
 MISO
@@ -443,25 +443,23 @@ Text Label 8000 2850 2    60   ~ 0
 SCK
 Text Label 8000 2950 2    60   ~ 0
 RESET
-Text Label 11150 3400 2    60   ~ 0
+Text Label 11000 3400 2    60   ~ 0
 RESET
-Text Label 11150 2700 2    60   ~ 0
+Text Label 11000 2700 2    60   ~ 0
 MISO
 Text Label 6300 1050 0    60   ~ 0
 AMBIENT
-Text Label 11150 2300 2    60   ~ 0
+Text Label 11000 2300 2    60   ~ 0
 AMBIENT
-Text Label 5300 2800 0    60   ~ 0
-PA7
 Text Label 5300 2900 0    60   ~ 0
 PB0
-Text Label 11150 3100 2    60   ~ 0
+Text Label 11000 3100 2    60   ~ 0
 PB0
-Text Label 11150 2900 2    60   ~ 0
-PA7
-Text Label 11150 2500 2    60   ~ 0
+Text Label 11000 2900 2    60   ~ 0
+~MOT_PWR_EN
+Text Label 11000 2500 2    60   ~ 0
 ~ACC_PWR_EN
-Text Label 11150 2400 2    60   ~ 0
+Text Label 11000 2400 2    60   ~ 0
 STATUS_LED
 Text Notes 5000 1600 0    39   ~ 0
 Use internal pull-up on BUTTON pin
@@ -471,7 +469,7 @@ Text Label 4850 2600 2    60   ~ 0
 MOTION
 Text Label 5050 1200 0    60   ~ 0
 BUTTON2
-Text Label 11150 3200 2    60   ~ 0
+Text Label 11000 3200 2    60   ~ 0
 BUTTON2
 Text Label 3950 2000 0    60   ~ 0
 MOTION
@@ -480,12 +478,12 @@ NoConn ~ 10900 1100
 $Comp
 L Device:C C1
 U 1 1 5A38B28C
-P 9300 2800
-F 0 "C1" H 9325 2900 50  0000 L CNN
-F 1 "10uF" H 9100 2900 50  0000 L CNN
-F 2 "Capacitor_SMD:C_0805_2012Metric_Pad1.15x1.40mm_HandSolder" H 9338 2650 50  0001 C CNN
-F 3 "" H 9300 2800 50  0001 C CNN
-	1    9300 2800
+P 9000 2800
+F 0 "C1" H 9025 2900 50  0000 L CNN
+F 1 "10uF" H 8800 2900 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric_Pad1.15x1.40mm_HandSolder" H 9038 2650 50  0001 C CNN
+F 3 "" H 9000 2800 50  0001 C CNN
+	1    9000 2800
 	1    0    0    -1  
 $EndComp
 Text Label 6300 650  0    60   ~ 0
@@ -495,7 +493,7 @@ Text Label 2250 1050 0    60   ~ 0
 Wire Wire Line
 	5450 750  5050 750 
 Wire Wire Line
-	10600 2600 11150 2600
+	10300 2600 11000 2600
 Wire Wire Line
 	9650 1100 10000 1100
 Wire Wire Line
@@ -509,9 +507,9 @@ Wire Wire Line
 Wire Wire Line
 	8750 1100 8450 1100
 Wire Wire Line
-	10600 2800 11150 2800
+	10300 2800 11000 2800
 Wire Wire Line
-	10600 3300 11150 3300
+	10300 3300 11000 3300
 Wire Wire Line
 	11050 1250 11050 650 
 Wire Wire Line
@@ -523,17 +521,15 @@ Wire Wire Line
 Wire Wire Line
 	7750 1150 7750 1250
 Wire Wire Line
-	10600 2200 11150 2200
+	10300 2200 11000 2200
 Wire Wire Line
-	10600 3400 11150 3400
+	10300 3400 11000 3400
 Wire Wire Line
-	10600 2700 11150 2700
+	10300 2700 11000 2700
 Wire Wire Line
 	6800 1050 6300 1050
 Wire Wire Line
-	10600 2300 11150 2300
-Wire Notes Line
-	2050 1700 11200 1700
+	10300 2300 11000 2300
 Wire Notes Line
 	7250 1700 7250 500 
 Wire Notes Line
@@ -555,15 +551,15 @@ Wire Wire Line
 Wire Wire Line
 	5750 2700 5300 2700
 Wire Wire Line
-	10600 2400 11150 2400
+	10300 2400 11000 2400
 Wire Wire Line
-	10600 2500 11150 2500
+	10300 2500 11000 2500
 Wire Wire Line
-	10600 2900 11150 2900
+	10300 2900 11000 2900
 Wire Wire Line
-	10600 3100 11150 3100
+	10300 3100 11000 3100
 Wire Wire Line
-	10600 3200 11150 3200
+	10300 3200 11000 3200
 Wire Notes Line
 	4900 3500 4900 1700
 Wire Wire Line
@@ -657,9 +653,9 @@ ACC_PWR
 Wire Wire Line
 	4500 2500 4850 2500
 Text Label 4850 2500 2    60   ~ 0
-ACC_PWR
+MOT_PWR
 Text Label 8200 1050 2    60   ~ 0
-ACC_PWR
+MOT_PWR
 $Comp
 L Connector:USB_B_Micro J3
 U 1 1 5A6A8C04
@@ -757,15 +753,15 @@ F 3 "" H 2450 3000 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	9300 1900 9300 2650
+	9000 1900 9000 2650
 Wire Wire Line
-	9300 1900 10000 1900
-Connection ~ 10000 1900
+	9000 1900 9700 1900
+Connection ~ 9700 1900
 Wire Wire Line
-	10000 3700 9300 3700
+	9700 3700 9000 3700
 Wire Wire Line
-	9300 3700 9300 2950
-Connection ~ 10000 3700
+	9000 3700 9000 2950
+Connection ~ 9700 3700
 Wire Wire Line
 	7600 2850 8000 2850
 Wire Wire Line
@@ -774,4 +770,38 @@ Wire Wire Line
 	8000 2650 7600 2650
 Wire Wire Line
 	8000 2750 7600 2750
+Text Label 750  1100 0    60   ~ 0
+~MOT_PWR_EN
+Wire Wire Line
+	1250 1100 750  1100
+Wire Wire Line
+	1550 900  750  900 
+Text Label 750  900  0    60   ~ 0
+MOT_PWR
+$Comp
+L Transistor_FET:BSS83P Q2
+U 1 1 5B7A3B7E
+P 1450 1100
+F 0 "Q2" H 1650 1175 50  0000 L CNN
+F 1 "BSS83P" H 1650 1100 50  0000 L CNN
+F 2 "Package_TO_SOT_SMD:SOT-23" H 1650 1025 50  0001 L CIN
+F 3 "" H 1450 1100 50  0001 L CNN
+	1    1450 1100
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR0104
+U 1 1 5B7A3B85
+P 1550 1300
+F 0 "#PWR0104" H 1550 1150 50  0001 C CNN
+F 1 "VCC" H 1550 1450 50  0000 C CNN
+F 2 "" H 1550 1300 50  0001 C CNN
+F 3 "" H 1550 1300 50  0001 C CNN
+	1    1550 1300
+	-1   0    0    1   
+$EndComp
+Wire Notes Line
+	500  1700 11200 1700
+Text Label 5300 2800 0    50   ~ 0
+MOT_PWR
 $EndSCHEMATC
