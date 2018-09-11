@@ -2,7 +2,7 @@
 #include <avr/sleep.h>
 #include <EEPROM.h>
 #include <FastLED.h>
-#include <Button.h>
+#include <JC_Button.h>
 #include "apa102_dim.h"
 
 //#define DEBUG_MOTION
@@ -92,8 +92,8 @@ Mode mode = running;
 
 APA102Controller_WithBrightness<PIN_SDA, PIN_SCK, BGR>ledController;
 
-Button button1(PIN_BUTTON_1, true, true, 20);
-Button button2(PIN_BUTTON_2, true, true, 20);
+Button button1(PIN_BUTTON_1);
+Button button2(PIN_BUTTON_2);
 
 ISR (PCINT0_vect) {
   // Don't need to do anything, just wake up.
@@ -268,6 +268,8 @@ void led_test() {
 }
 
 void setup() {
+  button1.begin();
+  button2.begin();
   pinMode(PIN_MOTION, INPUT);
   pinMode(PIN_AMBIENT, INPUT);
   pinMode(PIN_STATUS_LED, OUTPUT);
