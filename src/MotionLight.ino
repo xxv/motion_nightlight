@@ -45,6 +45,7 @@ const static int PIN_MOTION      = PIN_A0;
 const static int PIN_AMBIENT     = A1;
 const static int PIN_STATUS_LED  = PIN_A2;
 const static int PIN_ACC_PWR_DIS = PIN_A3;
+const static int PIN_MOT_PWR_DIS = PIN_A7;
 const static int PIN_BUTTON_1    = PIN_B2;
 const static int PIN_BUTTON_2    = PIN_B1;
 const static int PIN_SCK         = 4;
@@ -122,7 +123,11 @@ void watchdog_enable() {
   bitSet(WDTCSR, WDE); // enable watchdog
 }
 
-void set_accessory_powered(bool is_powered) {
+void set_motion_powered(const bool is_powered) {
+  digitalWrite(PIN_MOT_PWR_DIS, !is_powered);
+}
+
+void set_accessory_powered(const bool is_powered) {
   digitalWrite(PIN_ACC_PWR_DIS, !is_powered);
 
 #ifdef DEBUG_ACCESSORY_POWER
@@ -159,9 +164,11 @@ void sleep_now(bool deep_sleep) {
   woke_from_watchdog = false;
   watchdog_enable();
 
+  set_accessory_powered(false);
+  set_motion_powered(!deep_sleep);
+
   if (deep_sleep) {
     deep_sleep_countdown = 0;
-    set_accessory_powered(false);
   } else {
     pciSetup(PIN_MOTION);
   }
@@ -265,9 +272,11 @@ void setup() {
   pinMode(PIN_AMBIENT, INPUT);
   pinMode(PIN_STATUS_LED, OUTPUT);
   pinMode(PIN_ACC_PWR_DIS, OUTPUT);
+  pinMode(PIN_MOT_PWR_DIS, OUTPUT);
   FastLED.addLeds((CLEDController*) &ledController, leds, NUM_LEDS);
 
   set_accessory_powered(true);
+  set_motion_powered(true);
   led_test();
 
   load_settings();
@@ -372,20 +381,22 @@ void manage_power() {
 
 void setMode(Mode newMode) {
   if (mode != newMode) {
-    mode = newMode;
-
-    switch (mode) {
+    switch (newMode) {
       case deep_sleeping:
         // fall through
       case sleeping:
         // fall through
       case running:
-        digitalWrite(PIN_STATUS_LED, LOW);
+        if (mode == setting) {
+          digitalWrite(PIN_STATUS_LED, LOW);
+        }
+        set_motion_powered(true);
         break;
       case setting:
         digitalWrite(PIN_STATUS_LED, HIGH);
         break;
     }
+    mode = newMode;
   }
 }
 
