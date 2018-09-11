@@ -21,6 +21,7 @@ struct LightColors {
 struct SettingsData {
   uint8_t brightness_level_idx;
   uint8_t palette_idx;
+  int ambient_level;
 };
 
 const static uint8_t SETTINGS_ADDRESS = 0;
@@ -60,7 +61,6 @@ const static unsigned long TIMEOUT_MS         = 5000;
 const static long SETTING_TIMEOUT_MS    = 5000;
 const static long LONG_PRESS_MS         = 1000;
 
-const static int AMBIENT_DARKNESS_LEVEL = 50;
 const static int AMBIENT_HYSTERESIS = 10;
 
 // transient state
@@ -77,7 +77,7 @@ bool light_on = false;
 bool update_color = true;
 bool woke_from_watchdog = false;
 
-
+int ambient_darkness_level = 0;
 uint8_t brightness_idx = 0;
 uint8_t palette_idx = 0;
 
@@ -217,12 +217,14 @@ void load_settings() {
 
   set_brightness_level(data.brightness_level_idx);
   set_palette(data.palette_idx);
+  ambient_darkness_level = data.ambient_level;
 }
 
 void save_settings() {
   SettingsData data = {
     brightness_idx,
-    palette_idx
+    palette_idx,
+    ambient_darkness_level
   };
 
   EEPROM.put(SETTINGS_ADDRESS, data);
@@ -264,6 +266,9 @@ void led_test() {
   leds[WHITE_LED] = CRGB(20, 0, 0);
   FastLED.show();
   delay(500);
+  leds[RGB_LED] = CRGB(0, 0, 0);
+  leds[WHITE_LED] = CRGB(0, 0, 0);
+  FastLED.show();
   digitalWrite(PIN_STATUS_LED, LOW);
 }
 
@@ -282,6 +287,25 @@ void setup() {
   led_test();
 
   load_settings();
+
+  if (button1.isPressed() && button2.isPressed()) {
+    ambient_darkness_level = analogRead(PIN_AMBIENT);
+    save_settings();
+
+    digitalWrite(PIN_STATUS_LED, LOW);
+    delay(250);
+    digitalWrite(PIN_STATUS_LED, HIGH);
+    delay(250);
+    digitalWrite(PIN_STATUS_LED, LOW);
+    delay(250);
+    digitalWrite(PIN_STATUS_LED, HIGH);
+    delay(250);
+    digitalWrite(PIN_STATUS_LED, LOW);
+    delay(250);
+    digitalWrite(PIN_STATUS_LED, HIGH);
+    delay(250);
+  }
+
   digitalWrite(PIN_STATUS_LED, LOW);
 }
 
@@ -357,10 +381,10 @@ void redraw_lights() {
 void update_ambient_level() {
   if (is_dark_enough) {
     is_dark_enough = analogRead(PIN_AMBIENT) <=
-    (AMBIENT_DARKNESS_LEVEL + AMBIENT_HYSTERESIS);
+    (ambient_darkness_level + AMBIENT_HYSTERESIS);
   } else {
     is_dark_enough = analogRead(PIN_AMBIENT) <=
-     (AMBIENT_DARKNESS_LEVEL - AMBIENT_HYSTERESIS);
+     (ambient_darkness_level - AMBIENT_HYSTERESIS);
   }
 }
 
