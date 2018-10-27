@@ -24,7 +24,7 @@ battery_finger_size = 10;
 laser_pilot_hole = 1.33/2;
 
 // amount that the board mount overlaps with the wood
-overlap = 5;
+overlap = 6;
 // how much inset the battery lid rest is from the battery hole
 inset = 1;
 
