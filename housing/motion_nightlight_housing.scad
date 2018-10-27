@@ -4,7 +4,7 @@ $fn = 120;
 smidge = 0.1;
 
 // main interior volume
-interior = [94, 94, 32];
+interior_battery = [94, 94, 32];
 // thickness of the wall material
 wall_size = 3.3;
 // distance between the top and the board
@@ -37,45 +37,45 @@ wood_screws = [
   [plate_width/2 - overlap/2, overlap/2, 0]
   ];
 
-stand_volume = interior + [0, 0, 1];
+stand_volume_battery = interior_battery + [0, 0, 1];
 
 //////////////////////////////////////////////////////////////////////
 
-mockup();
+mockup(interior_battery, stand_volume_battery, battery_present=1);
 
 /********* laser cut *********/
-* enclosure_2d(interior, wall_size);
+*enclosure_2d(interior_battery, wall_size);
 
 /********* 3D Print **********/
-* board_holder();
-* battery_plate();
+*board_holder(interior_battery);
+* battery_plate(interior_battery);
 * grate();
-* diffuser_stand_print();
+* diffuser_stand_print(stand_volume_battery);
   // This can be a knife template for cutting the diffuser material
-* diffuser(stand_volume, 2);
+* diffuser(stand_volume_battery, 2);
 
 //////////////////////////////////////////////////////////////////////
 
-module mockup() {
+module mockup(interior, stand_volume, battery_present) {
   translate([interior[0]/2 - board_size[0]/2, board_clearance, 0])
-    electronics();
-  enclosure_with_design(interior);
+    electronics(battery_present);
+  enclosure_with_design(interior, stand_volume);
 }
 
-module diffuser_stand_print() {
+module diffuser_stand_print(stand_volume) {
   translate([0, 0, stand_volume[2]])
     rotate([0, 180,0])
       diffuser_stand(stand_volume);
 }
 
-module enclosure_with_design(interior) {
+module enclosure_with_design(interior, stand_volume) {
   translate([0, 0, -(interior[2] - board_z)]) {
     translate([0, 0, stand_volume[2]])
       diffuser_and_grate(stand_volume);
 
     color([0.5, 0.5, 0.5]) {
-      board_holder();
-      battery_plate();
+      board_holder(interior);
+      battery_plate(interior);
     }
 
     color("SaddleBrown", alpha=1)
@@ -135,7 +135,7 @@ module diffuser(inner_size, thickness=0.1) {
   }
 }
 
-module board_holder() {
+module board_holder(interior) {
   thickness = 1;
   stand_width = 6;
   battery_hole = [battery_hole_size[0] - inset * 2, battery_hole_size[1] - inset * 2, thickness + 1];
@@ -212,7 +212,7 @@ module board_holder() {
           }
 }
 
-module battery_plate() {
+module battery_plate(interior) {
   battery_plate_wall = [2, 2, 0];
   inset_for_mating = 0.2;
   extra_inset = [inset * 2 + inset_for_mating, inset * 2 + inset_for_mating, 0];
@@ -265,11 +265,11 @@ module back_face(box_inner, thickness, tabs) {
       rotate([180])
         screw_slot_2d(screw_head_size, screw_size, screw_head_size);
 
-    translate([interior[0]/2, 0])
+    translate([box_inner[0]/2, 0])
       for (m = [0 : 1 : 1])
         mirror([m, 0, 0])
           for (screw = wood_screws)
-            translate([0, interior[1]] - screw)
+            translate([0, box_inner[1]] - screw)
               circle(r=laser_pilot_hole);
   }
 }
@@ -364,8 +364,9 @@ module screw_slot_2d(head_size, screw_size, length) {
     circle(r=screw_size / 2);
 }
 
-module electronics() {
+module electronics(battery_present) {
   board();
+  if (battery_present) {
   translate([17.1, 29.4, -4.0]) {
     translate([0, 0, 0])
       rotate([0, 180, 0])
@@ -378,6 +379,7 @@ module electronics() {
     translate([17.1, -26.4, 3.1])
       rotate([0,180,0])
         battery();
+        }
   }
 }
 
