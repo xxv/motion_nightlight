@@ -19,7 +19,7 @@ board_hole_offset = 4;
 
 battery_hole_size = [46, 55];
 battery_hole_offset = [0, 3];
-battery_finger_size = 10;
+battery_finger_size = 15;
 // holes to screw plate into the wood
 laser_pilot_hole = 1.33/2;
 
@@ -214,9 +214,9 @@ module board_holder(interior) {
 
 module battery_plate(interior) {
   battery_plate_wall = [2, 2, 0];
-  inset_for_mating = 0.2;
+  inset_for_mating = 0.5;
   extra_inset = [inset * 2 + inset_for_mating, inset * 2 + inset_for_mating, 0];
-  wall_thickness = 1;
+  wall_thickness = 1.5;
   plate_thickness = 0.5;
   battery_hole = [battery_hole_size[0],
                   battery_hole_size[1],
