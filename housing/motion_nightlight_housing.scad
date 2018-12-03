@@ -37,22 +37,23 @@ wood_screws = [
   [plate_width/2 - overlap/2, overlap/2, 0]
   ];
 
-stand_volume_battery = interior_battery + [0, 0, 1];
+diffuser_stand_volume = interior_battery + [0, 0, 1];
+stand_material = 3;
 
 //////////////////////////////////////////////////////////////////////
 
-mockup(interior_battery, stand_volume_battery, battery_present=1);
+mockup(interior_battery, diffuser_stand_volume, battery_present=1);
 
 /********* laser cut *********/
 *enclosure_2d(interior_battery, wall_size);
 
 /********* 3D Print **********/
 *board_holder(interior_battery);
-* battery_plate(interior_battery);
-* grate();
-* diffuser_stand_print(stand_volume_battery);
+*battery_plate(interior_battery);
+*grate();
+*diffuser_stand_print(diffuser_stand_volume);
   // This can be a knife template for cutting the diffuser material
-* diffuser(stand_volume_battery, 2);
+*diffuser(diffuser_stand_volume, 2);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -63,9 +64,17 @@ module mockup(interior, stand_volume, battery_present) {
 }
 
 module diffuser_stand_print(stand_volume) {
-  translate([0, 0, stand_volume[2]])
-    rotate([0, 180,0])
-      diffuser_stand(stand_volume);
+  spacing = 1;
+
+  diffuser_stand_leg([stand_volume.x, stand_volume.z], stand_material);
+  translate([0, 1 * (stand_volume.z + spacing)])
+      diffuser_stand_leg([stand_volume.x, stand_volume.z], stand_material);
+
+  translate([0, 2 * (stand_volume.z + spacing)])
+    diffuser_stand_leg([stand_volume.y, stand_volume.z], stand_material);
+
+  translate([0, 3 * (stand_volume.z + spacing)])
+    diffuser_stand_leg([stand_volume.y, stand_volume.z], stand_material);
 }
 
 module enclosure_with_design(interior, stand_volume) {
@@ -95,30 +104,49 @@ module diffuser_and_grate(inner_size) {
     diffuser(inner_size, diffuser_thickness);
 
   color(c=[0.2, 0.2, 0.2])
-    translate([0, 0, -inner_size[2] - 0.01])
       diffuser_stand(inner_size);
 }
 
 module diffuser_stand(inner_size) {
-  diffuser_inset = 2.2;
-  intersection() {
-    difference() {
-      cube(inner_size);
-      inset_size = inner_size - [diffuser_inset * 2, diffuser_inset * 2, -1];
-      translate((inner_size - inset_size)/2)
-      cube(inset_size);
-    }
+  material = stand_material;
 
-    union() {
-      translate([0, 0, inner_size[2] - 1])
-        cube(inner_size - [0, 0, inner_size[2] - 1]);
+  rotate([-90, 0, 0])
+    linear_extrude(height=material)
+      diffuser_stand_leg([inner_size.x, inner_size.z], material);
 
-      for (r = [0 : 90 :360])
-          translate([inner_size[0]/2, inner_size[1]/2, 0])
-        rotate([0, 0, r])
-          translate([inner_size[0]/2, inner_size[1]/2, 0])
-            cylinder(r1=2, r2=15, h=inner_size[2]);
-    }
+  translate([0, inner_size.y, 0])
+    rotate([-90, 0, 270])
+      linear_extrude(height=material)
+        diffuser_stand_leg([inner_size.y, inner_size.z], material);
+
+  translate([inner_size.x, inner_size.y, 0])
+    rotate([-90, 0, 180])
+      linear_extrude(height=material)
+        diffuser_stand_leg([inner_size.x, inner_size.z], material);
+
+  translate([inner_size.x, 0, 0])
+    rotate([-90, 0, 90])
+      linear_extrude(height=material)
+        diffuser_stand_leg([inner_size.y, inner_size.z], material);
+}
+
+module diffuser_stand_leg(bounds, material) {
+  leg = 8;
+  top = 5;
+
+  difference() {
+    square(bounds);
+    translate([leg, top])
+      square([bounds.x - leg * 2, bounds.y - top]);
+
+    translate([0, bounds.y/3])
+      square([material, bounds.y/3]);
+
+    translate([bounds.x - material, 0])
+      square([material, bounds.y/3]);
+
+    translate([bounds.x - material, bounds.y * (2/3)])
+      square([material, bounds.y/3]);
   }
 }
 
