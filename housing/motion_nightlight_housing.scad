@@ -259,6 +259,9 @@ module battery_plate(interior) {
               cube(battery_hole - (battery_plate_wall + [0, 0, -3]));
             translate([(battery_hole_size[0] - extra_inset[0])/2, battery_hole_size[1] - extra_inset[1]/2, -1])
               cylinder(d=battery_finger_size, h=wall_thickness + plate_thickness + 2);
+            translate([-smidge, battery_hole.y, 0])
+              rotate([10, 0, 0])
+              cube([battery_hole.x + 2 * smidge, 1, battery_hole.z + 1]);
           }
 }
 
