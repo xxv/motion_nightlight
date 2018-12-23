@@ -37,7 +37,8 @@ wood_screws = [
   [plate_width/2 - overlap/2, overlap/2, 0]
   ];
 
-diffuser_stand_volume = interior_battery + [0, 0, 1];
+diffuser_stand_volume = interior_battery + [0, 0, 0];
+
 stand_material = 3;
 
 //////////////////////////////////////////////////////////////////////
