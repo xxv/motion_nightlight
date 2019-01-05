@@ -153,7 +153,7 @@ module diffuser_stand_leg(bounds, material) {
 
 module grate() {
   linear_extrude(height=1)
-    import("metal mesh design.dxf");
+    import("front_grate.dxf");
 }
 
 module diffuser(inner_size, thickness=0.1) {
