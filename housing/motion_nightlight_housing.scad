@@ -43,7 +43,7 @@ stand_material = 3;
 
 //////////////////////////////////////////////////////////////////////
 
-mockup(interior_battery, diffuser_stand_volume, battery_present=1);
+*mockup(interior_battery, diffuser_stand_volume, battery_present=1);
 
 /********* laser cut *********/
 *enclosure_2d(interior_battery, wall_size);
@@ -360,9 +360,12 @@ module enclosure_3d(box_inner, thickness) {
 module enclosure_2d(box_inner, thickness) {
   tab = thickness * 2;
   tabs = [tab, tab, tab];
+  margin = 2;
 
   offset_bottom_pieces = -box_inner[0] - thickness * 2.5;
-  layout_2d(box_inner, thickness) {
+  spacing = [box_inner.x + tab + margin, box_inner.z + tab + margin];
+
+  layout_2d_horizontal(box_inner, thickness, margin) {
     // Top
     empty();
 
@@ -371,13 +374,13 @@ module enclosure_2d(box_inner, thickness) {
       back_face(box_inner, thickness, tabs);
 
     // Left
-    translate([0, offset_bottom_pieces])
+    translate([-spacing.x * 2, spacing.y])
       difference() {
         side_b(box_inner, thickness, tabs);
       }
 
     // Right
-    translate([0, offset_bottom_pieces])
+    translate([-spacing.x * 3, spacing.y * 2])
       difference() {
         side_b(box_inner, thickness, tabs);
       }
@@ -386,6 +389,7 @@ module enclosure_2d(box_inner, thickness) {
     button_face(box_inner, thickness, tabs);
 
     // Back
+    translate([-spacing.x, spacing.y * 3])
     difference() {
       side_c(box_inner, thickness, tabs);
     }
