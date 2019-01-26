@@ -3,3 +3,6 @@
 .gcc-flags.json
 .piolibdeps
 housing/render/
+board/svg/
+board/gerbers/
+board/rescue-backup/
