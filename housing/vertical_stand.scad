@@ -51,13 +51,35 @@ module nice_curve() {
   }
 }
 
+/**
+ * A small inset to help prevent the plywood laminate from catching on the corner.
+ */
+module corner_inset_taper() {
+  corner_inset = 0.25;
+  corner_taper = 15;
+  linear_extrude(height=30)
+    polygon(points=[[-corner_inset, -corner_inset], [0, corner_taper], [corner_taper, corner_taper], [corner_taper, 0]]);
+}
+
 module vertical_stand(interior) {
   difference() {
     decorative_platform(interior);
-    translate([0, 0, cutout_z_offset])
-      cube([interior.x, interior.z, interior.x]);
     translate([lip, lip, -1])
       cube([interior.x - lip * 2, interior.z - lip * 2, interior.x]);
+    translate([0, 0, cutout_z_offset]) {
+      cube([interior.x, interior.z, interior.x]);
+
+    corner_inset_taper();
+    translate([0, interior.z, 0])
+      rotate([0, 0, -90])
+        corner_inset_taper();
+    translate([interior.x, interior.z, 0])
+      rotate([0, 0, -180])
+        corner_inset_taper();
+    translate([interior.x, 0, 0])
+      rotate([0, 0, -270])
+        corner_inset_taper();
+    }
   }
 }
 
