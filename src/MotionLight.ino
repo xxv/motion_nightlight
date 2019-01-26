@@ -272,6 +272,16 @@ void led_test() {
   digitalWrite(PIN_STATUS_LED, LOW);
 }
 
+int analogReadAverage(int pin, int count) {
+  int sum = 0;
+
+  for (int i = 0; i < count; i++) {
+    sum += analogRead(pin);
+  }
+
+  return sum / count;
+}
+
 void setup() {
   button1.begin();
   button2.begin();
@@ -289,7 +299,9 @@ void setup() {
   load_settings();
 
   if (button1.isPressed() && button2.isPressed()) {
-    ambient_darkness_level = analogRead(PIN_AMBIENT);
+    // a delay to ensure there is no light from the white LED
+    delay(100);
+    ambient_darkness_level = analogReadAverage(PIN_AMBIENT, 10);
     save_settings();
 
     digitalWrite(PIN_STATUS_LED, LOW);
