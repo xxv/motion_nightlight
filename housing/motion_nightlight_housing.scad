@@ -21,7 +21,7 @@ battery_hole_size = [46, 55];
 battery_hole_offset = [0, 3];
 battery_finger_size = 15;
 // holes to screw plate into the wood
-laser_pilot_hole = 1.33/2;
+laser_pilot_hole = 1.2/2;
 
 // amount that the board mount overlaps with the wood
 overlap = 6;
