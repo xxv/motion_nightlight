@@ -308,7 +308,7 @@ module back_face(box_inner, thickness, tabs) {
 
 module button_face(box_inner, thickness, tabs) {
   button_offset = [9.25, 0];
-  button_hole_size = 2;
+  button_hole_size = 5;
   button_z_offset_computed = 4.4;
   button_z_slop = 0.3; /* a little extra due to manufacturing variances */
   button_z_offset = button_z_offset_computed + button_z_slop;
@@ -318,10 +318,10 @@ module button_face(box_inner, thickness, tabs) {
 
     translate([box_inner[0] / 2, box_inner[2] - (board_z - button_z_offset)]) {
       translate(-button_offset)
-        circle(r=button_hole_size);
+        circle(d=button_hole_size);
 
       translate(button_offset)
-        circle(r=button_hole_size);
+        circle(d=button_hole_size);
       }
   }
 }
