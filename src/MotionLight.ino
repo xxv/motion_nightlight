@@ -26,6 +26,8 @@ struct SettingsData {
 
 const static uint8_t SETTINGS_ADDRESS = 0;
 
+const static long MODE_RANDOM_COLOR = 0xFFFFFE;
+
 const struct LightColors PALETTES[] = {
   { 0xFFBF00, 0x000000 }, // amber
   { 0x000000, 0x555555 }, // white
@@ -40,6 +42,7 @@ const struct LightColors PALETTES[] = {
   { 0x00FFFF, 0x000000 }, // teal
   { 0x0000FF, 0x000000 }, // blue
   { 0xFF00FF, 0x000000 }, // purple
+  { 0x000000, MODE_RANDOM_COLOR }, // show a random color
 };
 
 const static int PIN_MOTION      = PIN_A0;
@@ -65,7 +68,8 @@ const static int AMBIENT_HYSTERESIS = 10;
 
 // transient state
 unsigned long on_time = 0;
-CRGB leds[NUM_LEDS];
+CRGBArray<NUM_LEDS> leds;
+CRGBArray<NUM_LEDS> leds_prefade;
 
 uint8_t deep_sleep_countdown = 0;
 bool should_sleep = false;
@@ -247,6 +251,23 @@ void cycle_palette() {
 
 void set_palette(uint8_t index) {
   palette_idx = index % (sizeof(PALETTES)/sizeof(PALETTES[0]));
+  set_leds_prefade();
+}
+
+void set_leds_prefade() {
+  if (PALETTES[palette_idx].white == MODE_RANDOM_COLOR) {
+    if (random8(15) == 0) {
+      leds_prefade[RGB_LED] = 0x000000;
+      leds_prefade[WHITE_LED] = 0x555555;
+    } else {
+      leds_prefade[RGB_LED] = CHSV(random8(), 255, 255);
+      leds_prefade[WHITE_LED] = 0x000000;
+    }
+  } else {
+    leds_prefade[RGB_LED] = PALETTES[palette_idx].rgb;
+    leds_prefade[WHITE_LED] = PALETTES[palette_idx].white;
+  }
+
   update_color = true;
 }
 
@@ -332,12 +353,16 @@ void handleSettingMode() {
     buttonPressed = true;
   } else if (button1.pressedFor(LONG_PRESS_MS)) {
     set_brightness_level(0);
-    update_color = true;
     buttonPressed = true;
   } else if (button2.pressedFor(LONG_PRESS_MS)) {
-    palette_idx = 0;
-    update_color = true;
+    set_palette(0);
     buttonPressed = true;
+  }
+
+  if (PALETTES[palette_idx].white == MODE_RANDOM_COLOR) {
+    EVERY_N_MILLIS(500) {
+      set_leds_prefade();
+    }
   }
 
   if (buttonPressed) {
@@ -367,7 +392,7 @@ void handleRunningMode() {
     on_time = millis();
 
     if (!light_on) {
-      update_color = true;
+      set_leds_prefade();
     }
 
     light_on = true;
@@ -380,10 +405,11 @@ void handleRunningMode() {
 
 void redraw_lights() {
   if (update_color) {
-    leds[RGB_LED] = PALETTES[palette_idx].rgb;
-    leds[WHITE_LED] = PALETTES[palette_idx].white;
+    leds = leds_prefade;
+
     leds[RGB_LED].nscale8_video(fade_value);
     leds[WHITE_LED].nscale8_video(fade_value);
+
     update_color = false;
   }
 
