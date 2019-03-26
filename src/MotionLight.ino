@@ -11,8 +11,6 @@ const static bool DEBUG_MOTION          = false;
 const static bool DEBUG_SLEEPING        = false;
 const static bool DEBUG_WATCHDOG        = false;
 
-const static uint8_t BRIGHTNESS_LEVELS[] = { 2, 4, 8, 16, 31 };
-
 struct LightColors {
   long rgb;
   long white;
@@ -24,9 +22,11 @@ struct SettingsData {
   int ambient_level;
 };
 
+const static uint8_t BRIGHTNESS_LEVELS[] = { 2, 4, 8, 16, 31 };
+
 const static uint8_t SETTINGS_ADDRESS = 0;
 
-const static long MODE_RANDOM_COLOR = 0xFFFFFE;
+const static long COLOR_MODE_RANDOM = 0xFFFFFE;
 
 const struct LightColors PALETTES[] = {
   { 0xFFBF00, 0x000000 }, // amber
@@ -42,7 +42,7 @@ const struct LightColors PALETTES[] = {
   { 0x00FFFF, 0x000000 }, // teal
   { 0x0000FF, 0x000000 }, // blue
   { 0xFF00FF, 0x000000 }, // purple
-  { 0x000000, MODE_RANDOM_COLOR }, // show a random color
+  { 0x000000, COLOR_MODE_RANDOM }, // show a random color, incl. white
 };
 
 const static int PIN_MOTION      = PIN_A0;
@@ -61,8 +61,8 @@ const static int WHITE_LED      = 1;
 
 const static uint8_t DEEP_SLEEP_TIMEOUT_COUNT = 5; // number of watchdog wakes
 const static unsigned long TIMEOUT_MS         = 5000;
-const static long SETTING_TIMEOUT_MS    = 5000;
-const static long LONG_PRESS_MS         = 1000;
+const static long SETTING_TIMEOUT_MS          = 5000;
+const static long LONG_PRESS_MS               = 1000;
 
 const static int AMBIENT_HYSTERESIS = 10;
 
@@ -258,7 +258,7 @@ void set_palette(uint8_t index) {
 }
 
 void set_leds_prefade() {
-  if (PALETTES[palette_idx].white == MODE_RANDOM_COLOR) {
+  if (PALETTES[palette_idx].white == COLOR_MODE_RANDOM) {
     if (random8(15) == 0) {
       leds_prefade[RGB_LED] = 0x000000;
       leds_prefade[WHITE_LED] = 0x555555;
@@ -296,10 +296,10 @@ void led_test() {
   digitalWrite(PIN_STATUS_LED, LOW);
 }
 
-int analogReadAverage(int pin, int count) {
+int analogReadAverage(uint8_t pin, uint8_t count) {
   int sum = 0;
 
-  for (int i = 0; i < count; i++) {
+  for (uint8_t i = 0; i < count; i++) {
     sum += analogRead(pin);
   }
 
@@ -363,7 +363,7 @@ void handleSettingMode() {
   }
 
   // animate the palette to indicate random mode
-  if (PALETTES[palette_idx].white == MODE_RANDOM_COLOR) {
+  if (PALETTES[palette_idx].white == COLOR_MODE_RANDOM) {
     EVERY_N_MILLIS(333) {
       set_leds_prefade();
     }
@@ -423,10 +423,10 @@ void redraw_lights() {
 void update_ambient_level() {
   if (is_dark_enough) {
     is_dark_enough = analogRead(PIN_AMBIENT) <=
-    (ambient_darkness_level + AMBIENT_HYSTERESIS);
+                     (ambient_darkness_level + AMBIENT_HYSTERESIS);
   } else {
     is_dark_enough = analogRead(PIN_AMBIENT) <=
-     (ambient_darkness_level - AMBIENT_HYSTERESIS);
+                     (ambient_darkness_level - AMBIENT_HYSTERESIS);
   }
 }
 
