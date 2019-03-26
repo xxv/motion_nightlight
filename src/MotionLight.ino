@@ -5,11 +5,11 @@
 #include <JC_Button.h>
 #include "apa102_dim.h"
 
-//#define DEBUG_MOTION
-//#define DEBUG_AMBIENT
-//#define DEBUG_WATCHDOG
-//#define DEBUG_ACCESSORY_POWER
-//#define DEBUG_SLEEPING
+const static bool DEBUG_ACCESSORY_POWER = false;
+const static bool DEBUG_AMBIENT         = false;
+const static bool DEBUG_MOTION          = false;
+const static bool DEBUG_SLEEPING        = false;
+const static bool DEBUG_WATCHDOG        = false;
 
 const static uint8_t BRIGHTNESS_LEVELS[] = { 2, 4, 8, 16, 31 };
 
@@ -110,16 +110,19 @@ ISR (WDT_vect) {
   MCUSR = 0x00;
   WDTCSR |= _BV(WDE) | _BV(WDCE);
   WDTCSR = 0x00; // disable watchdog
-#ifdef DEBUG_WATCHDOG
-  digitalWrite(PIN_STATUS_LED, HIGH);
-#endif
+
+  if (DEBUG_WATCHDOG) {
+    digitalWrite(PIN_STATUS_LED, HIGH);
+  }
+
   woke_from_watchdog = true;
 }
 
 void watchdog_enable() {
-#ifdef DEBUG_WATCHDOG
-  digitalWrite(PIN_STATUS_LED, LOW);
-#endif
+  if (DEBUG_WATCHDOG) {
+    digitalWrite(PIN_STATUS_LED, LOW);
+  }
+
   bitSet(WDTCSR, WDIE);           // watchdog triggers an interrupt
   WDTCSR |= _BV(WDP0) | _BV(WDP1) | _BV(WDP2); // trigger every 2 seconds
 
@@ -133,9 +136,9 @@ void set_motion_powered(const bool is_powered) {
 void set_accessory_powered(const bool is_powered) {
   digitalWrite(PIN_ACC_PWR_DIS, !is_powered);
 
-#ifdef DEBUG_ACCESSORY_POWER
-  digitalWrite(PIN_STATUS_LED, is_powered);
-#endif
+  if (DEBUG_ACCESSORY_POWER) {
+    digitalWrite(PIN_STATUS_LED, is_powered);
+  }
 }
 
 void update_deep_sleep_monitoring() {
@@ -183,9 +186,10 @@ void sleep_now(bool deep_sleep) {
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);
   sleep_enable();
 
-#ifdef DEBUG_SLEEPING
-  digitalWrite(PIN_STATUS_LED, LOW);
-#endif
+  if (DEBUG_SLEEPING) {
+    digitalWrite(PIN_STATUS_LED, LOW);
+  }
+
   bitClear(ADCSRA, ADEN); // disable ADC
 
   // -.- zzz...
@@ -196,9 +200,9 @@ void sleep_now(bool deep_sleep) {
 
   bitSet(ADCSRA, ADEN); // re-enable ADC
 
-#ifdef DEBUG_SLEEPING
-  digitalWrite(PIN_STATUS_LED, HIGH);
-#endif
+  if (DEBUG_SLEEPING) {
+    digitalWrite(PIN_STATUS_LED, HIGH);
+  }
 
   disable_pc_interrupts();
   interrupts();
@@ -491,13 +495,13 @@ void loop() {
     }
   }
 
-#ifdef DEBUG_AMBIENT
-  digitalWrite(PIN_STATUS_LED, is_dark_enough);
-#endif
+  if (DEBUG_AMBIENT) {
+    digitalWrite(PIN_STATUS_LED, is_dark_enough);
+  }
 
-#ifdef DEBUG_MOTION
-  digitalWrite(PIN_STATUS_LED, motion);
-#endif
+  if (DEBUG_MOTION) {
+    digitalWrite(PIN_STATUS_LED, motion);
+  }
 
   EVERY_N_MILLIS(2) {
     prev_fade_value = fade_value;
