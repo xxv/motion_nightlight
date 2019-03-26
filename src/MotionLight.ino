@@ -359,8 +359,9 @@ void handleSettingMode() {
     buttonPressed = true;
   }
 
+  // animate the palette to indicate random mode
   if (PALETTES[palette_idx].white == MODE_RANDOM_COLOR) {
-    EVERY_N_MILLIS(500) {
+    EVERY_N_MILLIS(333) {
       set_leds_prefade();
     }
   }
