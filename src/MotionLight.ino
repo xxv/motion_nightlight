@@ -72,7 +72,6 @@ CRGBArray<NUM_LEDS> leds;
 CRGBArray<NUM_LEDS> leds_prefade;
 
 uint8_t deep_sleep_countdown = 0;
-bool should_sleep = false;
 uint8_t fade_value = 0;
 uint8_t prev_fade_value = 0;
 bool motion = false;
@@ -430,11 +429,6 @@ void update_ambient_level() {
 void manage_power() {
   if (mode == running) {
     if (!light_on && fade_value == 0) {
-      should_sleep = true;
-    }
-
-    if (should_sleep) {
-      should_sleep = false;
       sleep_now(false);
     }
   } else if (mode == deep_sleeping) {
