@@ -59,15 +59,17 @@ const static int NUM_LEDS       = 2;
 const static int RGB_LED        = 0;
 const static int WHITE_LED      = 1;
 
-const static uint8_t DEEP_SLEEP_TIMEOUT_COUNT = 5; // number of watchdog wakes
-const static unsigned long TIMEOUT_MS         = 5000;
-const static long SETTING_TIMEOUT_MS          = 5000;
-const static long LONG_PRESS_MS               = 1000;
+const static uint8_t DEEP_SLEEP_TIMEOUT_COUNT   = 5; // number of watchdog wakes
+const static unsigned long TIMEOUT_MS           = 5000;
+const static long SETTING_TIMEOUT_MS            = 5000;
+const static long BRIGHTNESS_SETTING_TIMEOUT_MS = 1500;
+const static long LONG_PRESS_MS                 = 1000;
 
 const static int AMBIENT_HYSTERESIS = 10;
 
 // transient state
 unsigned long on_time = 0;
+unsigned long brightness_setting_timeout = 0;
 CRGBArray<NUM_LEDS> leds;
 CRGBArray<NUM_LEDS> leds_prefade;
 
@@ -351,6 +353,7 @@ void handleSettingMode() {
   if (button1.wasPressed()) {
     cycle_brightness_level();
     buttonPressed = true;
+    brightness_setting_timeout = millis();
   } else if (button2.wasPressed()) {
     cycle_palette();
     buttonPressed = true;
@@ -363,7 +366,8 @@ void handleSettingMode() {
   }
 
   // animate the palette to indicate random mode
-  if (PALETTES[palette_idx].white == COLOR_MODE_RANDOM) {
+  if (PALETTES[palette_idx].white == COLOR_MODE_RANDOM &&
+      (millis() - brightness_setting_timeout) > BRIGHTNESS_SETTING_TIMEOUT_MS) {
     EVERY_N_MILLIS(333) {
       set_leds_prefade();
     }
