@@ -1,4 +1,4 @@
-(kicad_pcb (version 20171130) (host pcbnew 5.0.2+dfsg1-1)
+(kicad_pcb (version 20171130) (host pcbnew 5.1.4+dfsg1-1)
 
   (general
     (thickness 1.6)
@@ -41,8 +41,6 @@
     (zone_clearance 0.508)
     (zone_45_only no)
     (trace_min 0.2)
-    (segment_width 0.2)
-    (edge_width 0.2)
     (via_size 0.6)
     (via_drill 0.4)
     (via_min_size 0.4)
@@ -52,6 +50,8 @@
     (uvias_allowed no)
     (uvia_min_size 0.2)
     (uvia_min_drill 0.1)
+    (edge_width 0.2)
+    (segment_width 0.2)
     (pcb_text_width 0.3)
     (pcb_text_size 1.5 1.5)
     (mod_edge_width 0.15)
@@ -1437,7 +1437,7 @@
   (gr_arc (start 145 120) (end 149 120) (angle 90) (layer Edge.Cuts) (width 0.15))
   (gr_arc (start 118 120) (end 118 124) (angle 90) (layer Edge.Cuts) (width 0.15))
   (gr_arc (start 145 64) (end 145 60) (angle 90) (layer Edge.Cuts) (width 0.15))
-  (gr_arc (start 118 64) (end 114 64) (angle 89.9) (layer Edge.Cuts) (width 0.15))
+  (gr_arc (start 118 64) (end 114 64) (angle 90) (layer Edge.Cuts) (width 0.15))
   (gr_text "(Power only)" (at 120.3 113.2 270) (layer F.SilkS) (tstamp 5B5AABB6)
     (effects (font (size 1 1) (thickness 0.2)))
   )

@@ -1,6 +1,6 @@
 EESchema Schematic File Version 4
 LIBS:motion_light-cache
-EELAYER 26 0
+EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -15,7 +15,7 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L crumpschemes:APA102 U2
+L motion_light-rescue:APA102-crumpschemes U2
 U 1 1 59B43E23
 P 9200 1100
 F 0 "U2" H 9000 1400 60  0000 C CNN
@@ -31,7 +31,7 @@ F 8 "-" H 0   0   50  0001 C CNN "SPURL"
 	1    0    0    -1  
 $EndComp
 $Comp
-L crumpschemes:APA102 U3
+L motion_light-rescue:APA102-crumpschemes U3
 U 1 1 59B43E3A
 P 10450 1100
 F 0 "U3" H 10250 1400 60  0000 C CNN
@@ -334,7 +334,7 @@ F 3 "" H 4500 2700 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L steve_parts:PIR_MODULE U4
+L motion_light-rescue:PIR_MODULE-steve_parts U4
 U 1 1 59E6FCD5
 P 4050 2600
 F 0 "U4" H 4150 2800 60  0000 C CNN
