@@ -5,6 +5,8 @@ foot_extra_z = 1;
 cutout_z_offset = 2;
 lip = 2;
 
+smidge = 0.01;
+
 exterior = interior_battery + [wall_size * 2, wall_size * 2, wall_size * 2];
 
 %translate([0, exterior.z, cutout_z_offset])
@@ -14,7 +16,8 @@ exterior = interior_battery + [wall_size * 2, wall_size * 2, wall_size * 2];
 vertical_stand(exterior);
 
 module section(length) {
-  edge(length);
+  translate([-smidge, 0, 0])
+    edge(length + smidge * 2);
   rotate([0, 0, 90])
     corner();
 }
