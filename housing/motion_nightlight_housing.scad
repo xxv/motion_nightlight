@@ -243,7 +243,7 @@ module board_holder(interior) {
 
 module battery_plate(interior) {
   battery_plate_wall = [3, 3, 0];
-  inset_for_mating = 0.4;
+  inset_for_mating = 0.3;
   extra_inset = [inset * 2 + inset_for_mating, inset * 2 + inset_for_mating, 0];
   wall_thickness = 1.5;
   plate_thickness = 0.5;
