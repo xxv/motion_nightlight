@@ -23,7 +23,7 @@ Ingredients
 ### Other bits
 * Diffuser (`housing/diffuser.scad`) cut from LEE Filters 810 Zircon Diffusion
   1 (or similar)
-* Wood glue (+ clamps)
+* Wood glue (+ [clamps](https://github.com/xxv/corner-clamp))
 * Super glue
 * 2mm-wide double-stick tape or similar
 
